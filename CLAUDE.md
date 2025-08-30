@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Go-based CLI tool for image transformation, specifically designed for optimizing images for upload to MiriCanvas (미리캔버스). The tool focuses on single-file processing of JPG and PNG images with size/DPI conversion and watermark removal capabilities.
+This is a Go-based CLI tool for image transformation, designed for optimizing images with a focus on single-file processing of JPG and PNG images with size/DPI conversion and edge cropping capabilities.
 
 ## Key Requirements
 
@@ -12,14 +12,13 @@ This is a Go-based CLI tool for image transformation, specifically designed for 
 - **Image Formats**: JPG and PNG only (no GIF support)
 - **Single File Processing**: Process one image at a time (no batch processing)
 - **Size Conversion**: Resize to specified pixel dimensions or ratios
-- **DPI Conversion**: Convert to MiriCanvas recommended DPI (72dpi or 96dpi)
-- **Watermark Removal**: Area-based removal using blur/fill techniques (MVP)
+- **DPI Conversion**: Convert to recommended DPI (72dpi or 96dpi)
+- **Edge Cropping**: Remove edges from images for margin removal
 - **Library Design**: Core logic should be modular for future web service integration
 
 ### Technical Constraints
 - Must minimize image quality loss during conversion
 - Cross-platform support (Windows, macOS, Linux)
-- No MiriCanvas API integration
 - CLI-only interface (no GUI)
 
 ## Development Commands
@@ -74,7 +73,7 @@ go test -v ./...
 │   ├── transform/        # Core image transformation library
 │   │   ├── resize.go     # Size/resolution transformations
 │   │   ├── dpi.go        # DPI conversion logic
-│   │   └── watermark.go  # Watermark removal
+│   │   └── crop.go       # Edge cropping logic
 │   └── cli/              # CLI command implementations
 │       ├── convert.go    # Convert command
 │       └── root.go       # Root command setup
@@ -95,7 +94,7 @@ The core image processing logic should be in `pkg/transform/` as a reusable libr
 type ImageTransformer interface {
     Resize(input io.Reader, width, height int) (io.Reader, error)
     SetDPI(input io.Reader, dpi int) (io.Reader, error)
-    RemoveWatermark(input io.Reader, x, y, width, height int) (io.Reader, error)
+    CropEdges(input io.Reader, top, right, bottom, left int) (io.Reader, error)
 }
 ```
 
@@ -103,7 +102,7 @@ type ImageTransformer interface {
 Using Cobra, structure commands as:
 ```
 imagekit convert --size=1920x1080 --dpi=96 input.jpg output.jpg
-imagekit watermark --remove --area=100,100,200,200 input.jpg output.jpg
+imagekit crop --top=10 --bottom=10 --left=10 --right=10 input.jpg output.jpg
 ```
 
 ### Error Handling

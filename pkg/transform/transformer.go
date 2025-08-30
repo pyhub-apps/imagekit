@@ -53,30 +53,6 @@ func (t *Transformer) SetDPI(input io.Reader, output io.Writer, dpi int) error {
 	return ProcessImageWithDPI(bytes.NewReader(buf.Bytes()), output, format, dpi)
 }
 
-// RemoveWatermark implements watermark removal functionality
-func (t *Transformer) RemoveWatermark(input io.Reader, output io.Writer, area Rectangle) error {
-	// Load the image
-	img, format, err := LoadImage(input)
-	if err != nil {
-		return fmt.Errorf("failed to load image: %w", err)
-	}
-	
-	// Validate the rectangle
-	info := GetImageInfo(img, format)
-	if err := ValidateRectangle(area, info.Width, info.Height); err != nil {
-		return fmt.Errorf("invalid watermark area: %w", err)
-	}
-	
-	// For now, we'll implement the actual watermark removal in watermark.go
-	// This is just the interface implementation
-	processedImg, err := removeWatermarkFromArea(img, area)
-	if err != nil {
-		return fmt.Errorf("failed to remove watermark: %w", err)
-	}
-	
-	// Save the processed image
-	return SaveImage(output, processedImg, format, 95)
-}
 
 // CropEdges implements edge cropping functionality
 func (t *Transformer) CropEdges(input io.Reader, output io.Writer, options EdgeCropOptions) error {

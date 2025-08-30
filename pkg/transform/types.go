@@ -12,9 +12,6 @@ type ImageTransformer interface {
 	
 	// SetDPI sets the DPI metadata for an image
 	SetDPI(input io.Reader, output io.Writer, dpi int) error
-	
-	// RemoveWatermark removes watermark from specified area
-	RemoveWatermark(input io.Reader, output io.Writer, area Rectangle) error
 }
 
 // ResizeOptions contains options for resizing an image

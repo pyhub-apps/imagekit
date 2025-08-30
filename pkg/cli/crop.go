@@ -22,7 +22,7 @@ var (
 var cropCmd = &cobra.Command{
 	Use:   "crop [input-pattern or file] [output-file (optional)]",
 	Short: "이미지 가장자리 크롭",
-	Long: `이미지의 가장자리를 잘라냅니다. 워터마크 제거나 여백 제거에 유용합니다.
+	Long: `이미지의 가장자리를 잘라냅니다. 여백 제거에 유용합니다.
 	
 예제:
   # 단일 파일 크롭

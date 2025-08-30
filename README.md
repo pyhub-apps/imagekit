@@ -44,8 +44,7 @@ imagekit --version
 
 - ✅ **이미지 크기 변환**: 원하는 픽셀 크기나 비율로 이미지 리사이징
 - ✅ **DPI 변환**: 72, 96, 150, 300 DPI로 변환
-- ✅ **워터마크 제거**: 지정 영역 블러/채우기 처리
-- ✅ **가장자리 크롭**: 이미지 가장자리 제거 (워터마크/여백 제거용)
+- ✅ **가장자리 크롭**: 이미지 가장자리 제거 (여백 제거용)
 - ✅ **배치 처리**: glob 패턴으로 여러 파일 동시 처리
 - ✅ **형식 지원**: JPG, PNG 이미지 지원
 - ✅ **WebAssembly 버전**: 브라우저에서 직접 실행 가능 (서버 전송 없음)
@@ -153,8 +152,8 @@ imagekit convert --width=0.25x --height=0.25x "originals/*.jpg"
 ### 가장자리 크롭
 
 ```bash
-# 하단 100픽셀 제거 (워터마크 제거용)
-imagekit crop --bottom=100 watermarked.jpg clean.jpg
+# 하단 100픽셀 제거 (여백 제거용)
+imagekit crop --bottom=100 input.jpg output.jpg
 
 # 상단 10% 제거 (퍼센트 단위)
 imagekit crop --top=10% header-logo.jpg clean.jpg
@@ -165,18 +164,6 @@ imagekit crop --top=20 --bottom=20 --left=20 --right=20 input.jpg output.jpg
 # 여러 파일 배치 크롭
 imagekit crop --bottom=50 "watermarked/*.jpg"
 imagekit crop --top=15% "photos/*.png"
-```
-
-### 워터마크 제거
-
-```bash
-# 특정 영역 블러 처리 (x, y, width, height)
-imagekit watermark --area=100,100,200,50 input.jpg output.jpg
-
-# 제거 방법 지정
-imagekit watermark --area=100,100,200,50 --method=blur input.jpg output.jpg
-imagekit watermark --area=100,100,200,50 --method=fill input.jpg output.jpg
-imagekit watermark --area=100,100,200,50 --method=inpaint input.jpg output.jpg
 ```
 
 ## 명령어 옵션
@@ -199,13 +186,6 @@ imagekit watermark --area=100,100,200,50 --method=inpaint input.jpg output.jpg
 | `--bottom` | 하단에서 제거할 영역 (픽셀 또는 %) | - |
 | `--left` | 좌측에서 제거할 영역 (픽셀 또는 %) | - |
 | `--right` | 우측에서 제거할 영역 (픽셀 또는 %) | - |
-
-### watermark 명령어
-
-| 옵션 | 설명 | 기본값 |
-|------|------|--------|
-| `--area` | 워터마크 영역 (x,y,width,height) | 필수 |
-| `--method` | 제거 방법 (blur, fill, inpaint) | blur |
 
 ## 리사이징 모드
 
@@ -259,15 +239,6 @@ err := transformer.Resize(input, output, options)
 
 // DPI 설정
 err := transformer.SetDPI(input, output, 96)
-
-// 워터마크 제거
-area := transform.Rectangle{
-    X:      100,
-    Y:      100,
-    Width:  200,
-    Height: 50,
-}
-err := transformer.RemoveWatermark(input, output, area)
 
 // 가장자리 크롭
 cropOptions := transform.EdgeCropOptions{
