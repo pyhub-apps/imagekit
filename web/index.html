@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyHub ImageKit - 브라우저 이미지 변환 도구</title>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🖼️ PyHub ImageKit</h1>
+            <p>브라우저에서 안전하게 이미지를 변환하세요</p>
+            <div class="features">
+                <span class="feature">✅ 서버 전송 없음</span>
+                <span class="feature">✅ 100% 프라이버시</span>
+                <span class="feature">✅ 빠른 처리</span>
+            </div>
+        </header>
+
+        <main>
+            <!-- File Upload Area -->
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-content">
+                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <p class="upload-text">이미지를 드래그하거나 클릭하여 선택하세요</p>
+                    <p class="upload-hint">JPG, PNG 지원 (최대 10MB)</p>
+                    <input type="file" id="fileInput" accept="image/jpeg,image/png" multiple hidden>
+                </div>
+            </div>
+
+            <!-- Image List -->
+            <div class="image-list" id="imageList" style="display: none;">
+                <h2>선택된 이미지</h2>
+                <div class="image-grid" id="imageGrid"></div>
+            </div>
+
+            <!-- Processing Options -->
+            <div class="options-panel" id="optionsPanel" style="display: none;">
+                <h2>변환 옵션</h2>
+                
+                <!-- Resize Options -->
+                <div class="option-group">
+                    <label>
+                        <input type="checkbox" id="enableResize">
+                        크기 변경
+                    </label>
+                    <div class="option-content" id="resizeOptions" style="display: none;">
+                        <div class="input-row">
+                            <input type="text" id="resizeWidth" placeholder="너비 (px 또는 2x)">
+                            <span>×</span>
+                            <input type="text" id="resizeHeight" placeholder="높이 (px 또는 2x)">
+                        </div>
+                        <div class="hint">예: 1920, 2x, 0.5x</div>
+                    </div>
+                </div>
+
+                <!-- Crop Options -->
+                <div class="option-group">
+                    <label>
+                        <input type="checkbox" id="enableCrop">
+                        가장자리 크롭
+                    </label>
+                    <div class="option-content" id="cropOptions" style="display: none;">
+                        <div class="crop-grid">
+                            <input type="text" id="cropTop" placeholder="상단" class="crop-top">
+                            <input type="text" id="cropLeft" placeholder="좌측" class="crop-left">
+                            <div class="crop-center">이미지</div>
+                            <input type="text" id="cropRight" placeholder="우측" class="crop-right">
+                            <input type="text" id="cropBottom" placeholder="하단" class="crop-bottom">
+                        </div>
+                        <div class="hint">픽셀(100) 또는 퍼센트(10%) 입력</div>
+                    </div>
+                </div>
+
+                <!-- DPI Options -->
+                <div class="option-group">
+                    <label>
+                        <input type="checkbox" id="enableDPI">
+                        DPI 변경
+                    </label>
+                    <div class="option-content" id="dpiOptions" style="display: none;">
+                        <select id="dpiValue">
+                            <option value="72">72 DPI (웹용)</option>
+                            <option value="96">96 DPI (미리캔버스 권장)</option>
+                            <option value="150">150 DPI</option>
+                            <option value="300">300 DPI (인쇄용)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Process Button -->
+                <button class="process-btn" id="processBtn">이미지 변환</button>
+            </div>
+
+            <!-- Results -->
+            <div class="results" id="results" style="display: none;">
+                <h2>변환 결과</h2>
+                <div class="result-grid" id="resultGrid"></div>
+                <button class="download-all-btn" id="downloadAllBtn">모두 다운로드</button>
+            </div>
+        </main>
+
+        <footer>
+            <p>© 2024 PyHub ImageKit | <a href="https://github.com/pyhub-apps/pyhub-imagekit" target="_blank">GitHub</a></p>
+        </footer>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>WebAssembly 로딩 중...</p>
+    </div>
+
+    <script src="static/wasm_exec.js"></script>
+    <script src="static/app.js"></script>
+</body>
+</html>

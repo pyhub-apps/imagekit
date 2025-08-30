@@ -1,0 +1,34 @@
+# WebAssembly build and development
+
+.PHONY: wasm-build wasm-serve wasm-dev wasm-clean
+
+# Build WebAssembly binary
+wasm-build:
+	@echo "Building WebAssembly..."
+	GOOS=js GOARCH=wasm go build -o web/static/imagekit.wasm cmd/wasm/main.go
+	@echo "WebAssembly build complete: web/static/imagekit.wasm"
+	@ls -lh web/static/imagekit.wasm
+
+# Serve WebAssembly app locally
+wasm-serve: wasm-build
+	@echo "Starting local server at http://localhost:8080"
+	@echo "Press Ctrl+C to stop"
+	@cd web && python3 -m http.server 8080
+
+# Development mode (build and serve)
+wasm-dev: wasm-build wasm-serve
+
+# Clean WebAssembly build
+wasm-clean:
+	rm -f web/static/imagekit.wasm
+	@echo "WebAssembly build cleaned"
+
+# Help
+wasm-help:
+	@echo "WebAssembly Makefile commands:"
+	@echo "  make -f Makefile.wasm wasm-build  - Build WebAssembly binary"
+	@echo "  make -f Makefile.wasm wasm-serve  - Build and serve locally"
+	@echo "  make -f Makefile.wasm wasm-dev    - Development mode (alias for wasm-serve)"
+	@echo "  make -f Makefile.wasm wasm-clean  - Clean WebAssembly build"
+	@echo ""
+	@echo "After running wasm-serve, open http://localhost:8080 in your browser"
