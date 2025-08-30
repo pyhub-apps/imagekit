@@ -35,6 +35,16 @@ async function initWasm() {
         if (initialLoadMessage) {
             initialLoadMessage.style.display = ''; // Reset display
         }
+        
+        // Update version display
+        if (typeof window.getImageKitVersion === 'function') {
+            const version = window.getImageKitVersion();
+            const versionElement = document.getElementById('imagekit-version');
+            if (versionElement) {
+                versionElement.textContent = version;
+            }
+        }
+        
         console.log('WebAssembly loaded successfully');
         console.log('Available functions:', Object.keys(window).filter(k => k.includes('Image')));
     } catch (error) {

@@ -16,15 +16,24 @@ import (
 	"github.com/disintegration/imaging"
 )
 
+// Version is set at build time or defaults to the current version
+var Version = "1.2535.17"
+
 func main() {
 	// Register JavaScript functions
 	js.Global().Set("resizeImage", js.FuncOf(resizeImage))
 	js.Global().Set("cropImage", js.FuncOf(cropImage))
 	js.Global().Set("convertDPI", js.FuncOf(convertDPI))
 	js.Global().Set("processImage", js.FuncOf(processImage))
+	js.Global().Set("getImageKitVersion", js.FuncOf(getVersion))
 
 	// Keep the Go program running
 	select {}
+}
+
+// getVersion returns the ImageKit version
+func getVersion(this js.Value, args []js.Value) interface{} {
+	return Version
 }
 
 // resizeImage resizes an image
