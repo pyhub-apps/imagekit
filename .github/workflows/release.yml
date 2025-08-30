@@ -1,0 +1,172 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build and Release
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        include:
+          # macOS builds
+          - goos: darwin
+            goarch: amd64
+            suffix: ''
+            
+          - goos: darwin
+            goarch: arm64
+            suffix: ''
+            
+          # Windows builds
+          - goos: windows
+            goarch: amd64
+            suffix: '.exe'
+            
+          - goos: windows
+            goarch: arm64
+            suffix: '.exe'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history for git commands in headver.sh
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+      
+      - name: Generate version
+        id: version
+        run: |
+          chmod +x scripts/headver.sh
+          VERSION=$(GITHUB_RUN_NUMBER=${{ github.run_number }} ./scripts/headver.sh)
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Version: ${VERSION}"
+      
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 0
+        run: |
+          OUTPUT="imagekit-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}"
+          echo "Building ${OUTPUT}..."
+          go build -ldflags "-s -w -X main.Version=${{ steps.version.outputs.version }}" \
+            -o "${OUTPUT}" \
+            cmd/imagekit/main.go
+          
+          # Create checksum
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            sha256sum "${OUTPUT}" > "${OUTPUT}.sha256"
+          else
+            shasum -a 256 "${OUTPUT}" > "${OUTPUT}.sha256"
+          fi
+          
+          echo "Build complete: ${OUTPUT}"
+          ls -lh "${OUTPUT}"*
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: imagekit-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: |
+            imagekit-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}
+            imagekit-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}.sha256
+  
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Generate version
+        id: version
+        run: |
+          chmod +x scripts/headver.sh
+          VERSION=$(GITHUB_RUN_NUMBER=${{ github.run_number }} ./scripts/headver.sh)
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Version: ${VERSION}"
+      
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+      
+      - name: Prepare release files
+        run: |
+          mkdir -p release
+          find artifacts -type f \( -name "imagekit-*" \) -exec mv {} release/ \;
+          ls -lh release/
+      
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          cat << EOF > release_notes.md
+          ## Release v${{ steps.version.outputs.version }}
+          
+          ### 다운로드
+          
+          #### macOS
+          - Intel: \`imagekit-darwin-amd64\`
+          - Apple Silicon: \`imagekit-darwin-arm64\`
+          
+          #### Windows
+          - x64: \`imagekit-windows-amd64.exe\`
+          - ARM64: \`imagekit-windows-arm64.exe\`
+          
+          ### 설치 방법
+          
+          1. 위 파일 중 사용하는 OS와 아키텍처에 맞는 파일을 다운로드
+          2. 실행 권한 부여 (macOS/Linux):
+             \`\`\`bash
+             chmod +x imagekit-darwin-arm64
+             \`\`\`
+          3. 실행:
+             \`\`\`bash
+             ./imagekit-darwin-arm64 --help
+             \`\`\`
+          
+          ### 변경사항
+          
+          최근 커밋 내역:
+          $(git log --oneline -10 || echo "No recent commits")
+          
+          ### 체크섬 확인
+          
+          각 바이너리 파일에는 \`.sha256\` 체크섬 파일이 포함되어 있습니다.
+          
+          \`\`\`bash
+          # macOS/Linux
+          shasum -a 256 -c imagekit-darwin-arm64.sha256
+          
+          # Windows (PowerShell)
+          Get-FileHash imagekit-windows-amd64.exe -Algorithm SHA256
+          \`\`\`
+          EOF
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: v${{ steps.version.outputs.version }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+          files: release/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

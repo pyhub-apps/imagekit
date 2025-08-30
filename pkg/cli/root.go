@@ -13,6 +13,11 @@ JPG 및 PNG 이미지의 크기, DPI를 변환하고 워터마크를 제거할 �
 	Version: "1.0.0",
 }
 
+// SetVersion sets the version for the CLI
+func SetVersion(v string) {
+	rootCmd.Version = v
+}
+
 // Execute runs the root command
 func Execute() error {
 	return rootCmd.Execute()

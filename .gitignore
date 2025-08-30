@@ -4,8 +4,8 @@
 *.dll
 *.so
 *.dylib
-imagekit
-imagekit-*
+/imagekit
+/imagekit-*
 
 # Test binary, built with `go test -c`
 *.test
