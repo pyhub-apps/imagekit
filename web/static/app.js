@@ -2,7 +2,7 @@
 let wasmReady = false;
 let selectedFiles = [];
 let processedImages = [];
-const WASM_VERSION = 'v1.2535.17-1-gd77708e'; // Injected at build time
+const WASM_VERSION = 'v1.2535.17-2-g615a231'; // Injected at build time
 
 // Initialize WebAssembly
 async function initWasm() {
