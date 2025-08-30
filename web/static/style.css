@@ -414,6 +414,193 @@ footer a:hover {
     border-bottom-color: white;
 }
 
+/* Crop Modal */
+.crop-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.crop-modal-content {
+    background: white;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 1200px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.crop-modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.crop-modal-header h2 {
+    margin: 0;
+    color: #333;
+}
+
+.crop-modal-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #999;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.crop-modal-close:hover {
+    color: #333;
+}
+
+.crop-modal-body {
+    padding: 20px;
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    gap: 20px;
+}
+
+.crop-container {
+    flex: 1;
+    position: relative;
+}
+
+#cropCanvas {
+    max-width: 100%;
+    max-height: 500px;
+    border: 1px solid #ddd;
+    cursor: crosshair;
+    display: block;
+}
+
+.crop-info {
+    margin-top: 10px;
+    color: #666;
+}
+
+.crop-coords {
+    font-family: monospace;
+    font-size: 12px;
+    color: #999;
+    margin-top: 5px;
+}
+
+.crop-preview {
+    width: 250px;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.crop-preview h3 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: #666;
+}
+
+#cropPreview {
+    width: 100%;
+    border: 1px solid #ddd;
+    background: white;
+}
+
+.crop-modal-footer {
+    padding: 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.crop-presets {
+    display: flex;
+    gap: 10px;
+}
+
+.preset-btn {
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.preset-btn:hover {
+    background: #f0f0f0;
+}
+
+.preset-btn.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.crop-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-cancel, .btn-apply {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.btn-cancel {
+    background: #f0f0f0;
+    color: #666;
+}
+
+.btn-cancel:hover {
+    background: #e0e0e0;
+}
+
+.btn-apply {
+    background: #28a745;
+    color: white;
+}
+
+.btn-apply:hover {
+    background: #218838;
+}
+
+.crop-btn {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.crop-btn:hover {
+    background: #5a67d8;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     header h1 {
@@ -432,5 +619,13 @@ footer a:hover {
     
     .crop-grid {
         max-width: 300px;
+    }
+    
+    .crop-modal-body {
+        flex-direction: column;
+    }
+    
+    .crop-preview {
+        width: 100%;
     }
 }

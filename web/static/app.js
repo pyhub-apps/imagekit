@@ -30,6 +30,11 @@ async function initWasm() {
         
         wasmReady = true;
         document.getElementById('loading').classList.add('hidden');
+        // Reset loading message for future use
+        const initialLoadMessage = document.querySelector('.initial-load-message');
+        if (initialLoadMessage) {
+            initialLoadMessage.style.display = ''; // Reset display
+        }
         console.log('WebAssembly loaded successfully');
         console.log('Available functions:', Object.keys(window).filter(k => k.includes('Image')));
     } catch (error) {
@@ -45,6 +50,15 @@ async function initWasm() {
 document.addEventListener('DOMContentLoaded', () => {
     initWasm();
     setupEventListeners();
+    
+    // Set current year in footer
+    const yearElement = document.getElementById('current-year');
+    if (yearElement) {
+        yearElement.textContent = new Date().getFullYear();
+    }
+    
+    // Initialize crop dialog
+    cropDialog = new CropDialog();
 });
 
 // Setup event listeners
@@ -77,27 +91,26 @@ function setupEventListeners() {
     
     // Options toggles with auto-save
     document.getElementById('enableResize').addEventListener('change', (e) => {
-        document.getElementById('resizeOptions').style.display = e.target.checked ? 'block' : 'none';
-        saveOptions();
-    });
-    
-    document.getElementById('enableCrop').addEventListener('change', (e) => {
-        document.getElementById('cropOptions').style.display = e.target.checked ? 'block' : 'none';
+        if (e.target.checked) {
+            document.getElementById('resizeOptions').classList.remove('hidden');
+        } else {
+            document.getElementById('resizeOptions').classList.add('hidden');
+        }
         saveOptions();
     });
     
     document.getElementById('enableDPI').addEventListener('change', (e) => {
-        document.getElementById('dpiOptions').style.display = e.target.checked ? 'block' : 'none';
+        if (e.target.checked) {
+            document.getElementById('dpiOptions').classList.remove('hidden');
+        } else {
+            document.getElementById('dpiOptions').classList.add('hidden');
+        }
         saveOptions();
     });
     
     // Save options on input change
     document.getElementById('resizeWidth').addEventListener('input', saveOptions);
     document.getElementById('resizeHeight').addEventListener('input', saveOptions);
-    document.getElementById('cropTop').addEventListener('input', saveOptions);
-    document.getElementById('cropRight').addEventListener('input', saveOptions);
-    document.getElementById('cropBottom').addEventListener('input', saveOptions);
-    document.getElementById('cropLeft').addEventListener('input', saveOptions);
     document.getElementById('dpiValue').addEventListener('change', saveOptions);
     
     // Process button
@@ -119,20 +132,21 @@ function loadSavedOptions() {
             document.getElementById('enableResize').checked = options.enableResize !== false; // Default true
             document.getElementById('resizeWidth').value = options.resizeWidth || '';
             document.getElementById('resizeHeight').value = options.resizeHeight || '';
-            document.getElementById('resizeOptions').style.display = options.enableResize !== false ? 'block' : 'none';
+            if (options.enableResize !== false) {
+                document.getElementById('resizeOptions').classList.remove('hidden');
+            } else {
+                document.getElementById('resizeOptions').classList.add('hidden');
+            }
             
-            // Load crop options
-            document.getElementById('enableCrop').checked = options.enableCrop || false;
-            document.getElementById('cropTop').value = options.cropTop || '';
-            document.getElementById('cropRight').value = options.cropRight || '';
-            document.getElementById('cropBottom').value = options.cropBottom || '';
-            document.getElementById('cropLeft').value = options.cropLeft || '';
-            document.getElementById('cropOptions').style.display = options.enableCrop ? 'block' : 'none';
             
             // Load DPI options
             document.getElementById('enableDPI').checked = options.enableDPI !== false; // Default true
             document.getElementById('dpiValue').value = options.dpiValue || '300';
-            document.getElementById('dpiOptions').style.display = options.enableDPI !== false ? 'block' : 'none';
+            if (options.enableDPI !== false) {
+                document.getElementById('dpiOptions').classList.remove('hidden');
+            } else {
+                document.getElementById('dpiOptions').classList.add('hidden');
+            }
         } catch (error) {
             console.error('Failed to load saved options:', error);
             setDefaultOptions();
@@ -145,9 +159,9 @@ function loadSavedOptions() {
 // Set default options for first-time users
 function setDefaultOptions() {
     document.getElementById('enableResize').checked = true;
-    document.getElementById('resizeOptions').style.display = 'block';
+    document.getElementById('resizeOptions').classList.remove('hidden');
     document.getElementById('enableDPI').checked = true;
-    document.getElementById('dpiOptions').style.display = 'block';
+    document.getElementById('dpiOptions').classList.remove('hidden');
     document.getElementById('dpiValue').value = '300';
     saveOptions();
 }
@@ -158,11 +172,6 @@ function saveOptions() {
         enableResize: document.getElementById('enableResize').checked,
         resizeWidth: document.getElementById('resizeWidth').value,
         resizeHeight: document.getElementById('resizeHeight').value,
-        enableCrop: document.getElementById('enableCrop').checked,
-        cropTop: document.getElementById('cropTop').value,
-        cropRight: document.getElementById('cropRight').value,
-        cropBottom: document.getElementById('cropBottom').value,
-        cropLeft: document.getElementById('cropLeft').value,
         enableDPI: document.getElementById('enableDPI').checked,
         dpiValue: document.getElementById('dpiValue').value
     };
@@ -197,8 +206,8 @@ function handleFiles(files) {
     selectedFiles = validFiles;
     displaySelectedImages();
     
-    document.getElementById('imageList').style.display = 'block';
-    document.getElementById('optionsPanel').style.display = 'block';
+    document.getElementById('imageList').classList.remove('hidden');
+    document.getElementById('optionsPanel').classList.remove('hidden');
 }
 
 // Display selected images
@@ -210,18 +219,18 @@ function displaySelectedImages() {
         const reader = new FileReader();
         reader.onload = (e) => {
             const item = document.createElement('div');
-            item.className = 'image-item';
+            item.className = 'relative bg-gray-100 rounded-lg overflow-hidden aspect-square';
             item.innerHTML = `
-                <img src="${e.target.result}" alt="${file.name}">
-                <button class="remove-btn" data-index="${index}">×</button>
+                <img src="${e.target.result}" alt="${file.name}" class="w-full h-full object-cover">
+                <button class="absolute top-2 right-2 w-7 h-7 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center text-lg leading-none remove-btn" data-index="${index}">×</button>
             `;
             
             item.querySelector('.remove-btn').addEventListener('click', () => {
                 selectedFiles.splice(index, 1);
                 if (selectedFiles.length === 0) {
-                    document.getElementById('imageList').style.display = 'none';
-                    document.getElementById('optionsPanel').style.display = 'none';
-                    document.getElementById('results').style.display = 'none';
+                    document.getElementById('imageList').classList.add('hidden');
+                    document.getElementById('optionsPanel').classList.add('hidden');
+                    document.getElementById('results').classList.add('hidden');
                 } else {
                     displaySelectedImages();
                 }
@@ -254,7 +263,16 @@ async function processImages() {
     }
     
     document.getElementById('loading').classList.remove('hidden');
-    document.querySelector('.loading p').textContent = '이미지 처리 중...';
+    // Change only the first p element (main message)
+    const loadingMessages = document.querySelectorAll('#loading p');
+    if (loadingMessages.length > 0) {
+        loadingMessages[0].textContent = '이미지 처리 중...';
+        // Hide the second message (about initial loading time)
+        const initialLoadMessage = document.querySelector('.initial-load-message');
+        if (initialLoadMessage) {
+            initialLoadMessage.style.display = 'none';
+        }
+    }
     
     processedImages = [];
     
@@ -291,7 +309,7 @@ async function processImages() {
 function getProcessingOptions() {
     const options = {
         resize: document.getElementById('enableResize').checked,
-        crop: document.getElementById('enableCrop').checked,
+        crop: false, // Crop is now handled via individual image dialog
         dpi: document.getElementById('enableDPI').checked,
         width: 0,
         height: 0,
@@ -304,13 +322,6 @@ function getProcessingOptions() {
     if (options.resize) {
         options.width = parseSize(document.getElementById('resizeWidth').value) || 0;
         options.height = parseSize(document.getElementById('resizeHeight').value) || 0;
-    }
-    
-    if (options.crop) {
-        options.cropTop = document.getElementById('cropTop').value || '0';
-        options.cropRight = document.getElementById('cropRight').value || '0';
-        options.cropBottom = document.getElementById('cropBottom').value || '0';
-        options.cropLeft = document.getElementById('cropLeft').value || '0';
     }
     
     if (options.dpi) {
@@ -439,32 +450,50 @@ function displayResults() {
         }
         
         const item = document.createElement('div');
-        item.className = 'result-item';
+        item.className = 'bg-gray-50 rounded-lg overflow-hidden';
         
         // Calculate new size from base64
         const base64Parts = image.data.split(',');
         const base64Length = base64Parts.length > 1 ? base64Parts[1].length : 0;
         const newSize = Math.round(base64Length * 0.75);
         
+        // Create image element to get dimensions
+        const img = item.querySelector('img') || document.createElement('img');
+        
         item.innerHTML = `
-            <img src="${image.data}" alt="${image.name}">
-            <div class="result-info">
-                <p><strong>${image.name}</strong></p>
-                <p>원본: ${formatFileSize(image.originalSize)}</p>
-                <p>변환: ${formatFileSize(newSize)}</p>
-                ${image.dpi ? `<p>DPI: ${image.dpi}</p>` : ''}
-                <button class="download-btn" data-index="${index}">다운로드</button>
+            <img src="${image.data}" alt="${image.name}" class="w-full h-48 object-cover result-image">
+            <div class="p-4">
+                <p class="font-semibold text-gray-800 mb-2 truncate">${image.name}</p>
+                <p class="text-sm text-gray-600">원본: ${formatFileSize(image.originalSize)}</p>
+                <p class="text-sm text-gray-600">변환: ${formatFileSize(newSize)}</p>
+                <p class="text-sm text-gray-600 dimensions-info">크기: 로딩중...</p>
+                ${image.dpi ? `<p class="text-sm text-gray-600">DPI: ${image.dpi}</p>` : ''}
+                <button class="w-full mt-3 mb-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors download-btn" data-index="${index}">다운로드</button>
+                <button class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors crop-btn" data-index="${index}">크롭</button>
             </div>
         `;
+        
+        // Load image to get dimensions
+        const resultImg = item.querySelector('.result-image');
+        resultImg.onload = function() {
+            const dimensionsInfo = item.querySelector('.dimensions-info');
+            if (dimensionsInfo) {
+                dimensionsInfo.textContent = `크기: ${this.naturalWidth} × ${this.naturalHeight}px`;
+            }
+        };
         
         item.querySelector('.download-btn').addEventListener('click', () => {
             downloadImage(image);
         });
         
+        item.querySelector('.crop-btn').addEventListener('click', () => {
+            openCropDialog(image);
+        });
+        
         resultGrid.appendChild(item);
     });
     
-    results.style.display = 'block';
+    results.classList.remove('hidden');
     results.scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -510,4 +539,328 @@ function downloadAll() {
             }, index * 100); // Delay to prevent browser blocking
         }
     });
+}
+
+// Crop Dialog Class
+class CropDialog {
+    constructor() {
+        this.modal = document.getElementById('cropModal');
+        this.canvas = document.getElementById('cropCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.previewCanvas = document.getElementById('cropPreview');
+        this.previewCtx = this.previewCanvas.getContext('2d');
+        this.coordsDiv = document.getElementById('cropCoords');
+        
+        this.image = null;
+        this.imageData = null;
+        this.imageName = null;
+        this.isDrawing = false;
+        this.startX = 0;
+        this.startY = 0;
+        this.endX = 0;
+        this.endY = 0;
+        this.ratio = 0; // 0 = free, >0 = fixed ratio
+        
+        this.setupEventListeners();
+    }
+    
+    setupEventListeners() {
+        // Modal controls
+        document.getElementById('cropModalClose').addEventListener('click', () => this.close());
+        document.getElementById('cropCancel').addEventListener('click', () => this.close());
+        document.getElementById('cropApply').addEventListener('click', () => this.applyCrop());
+        
+        // Canvas events - only mousedown on canvas
+        this.canvas.addEventListener('mousedown', (e) => this.startDraw(e));
+        
+        // Document-level events for mousemove and mouseup to track outside canvas
+        this.documentMouseMove = (e) => this.draw(e);
+        this.documentMouseUp = () => this.endDraw();
+        
+        // Preset buttons
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.ratio = parseFloat(btn.dataset.ratio);
+                this.redrawSelection();
+            });
+        });
+    }
+    
+    open(imageData, imageName) {
+        this.imageData = imageData;
+        this.imageName = imageName;
+        this.modal.classList.remove('hidden');
+        
+        // Reset ratio and set first button as active
+        this.ratio = 0;
+        document.querySelectorAll('.preset-btn').forEach((btn, index) => {
+            if (index === 0) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        
+        // Load image
+        this.image = new Image();
+        this.image.onload = () => {
+            this.initCanvas();
+        };
+        this.image.src = imageData;
+    }
+    
+    close() {
+        this.modal.classList.add('hidden');
+        this.clearSelection();
+        
+        // Ensure document listeners are removed
+        document.removeEventListener('mousemove', this.documentMouseMove);
+        document.removeEventListener('mouseup', this.documentMouseUp);
+        this.isDrawing = false;
+    }
+    
+    initCanvas() {
+        // Calculate scale to fit canvas - use most of modal space
+        const modalBody = document.getElementById('cropModalBody');
+        const containerWidth = modalBody ? modalBody.clientWidth * 0.65 : window.innerWidth * 0.6;
+        const containerHeight = window.innerHeight * 0.75;
+        
+        const maxWidth = Math.min(1200, containerWidth);
+        const maxHeight = Math.min(800, containerHeight);
+        
+        let width = this.image.width;
+        let height = this.image.height;
+        
+        if (width > maxWidth || height > maxHeight) {
+            const scale = Math.min(maxWidth / width, maxHeight / height);
+            width = Math.round(width * scale);
+            height = Math.round(height * scale);
+        }
+        
+        this.canvas.width = width;
+        this.canvas.height = height;
+        this.scale = width / this.image.width;
+        
+        // Draw image
+        this.ctx.drawImage(this.image, 0, 0, width, height);
+        
+        // Clear any previous selection
+        this.clearSelection();
+    }
+    
+    startDraw(e) {
+        e.preventDefault();
+        const rect = this.canvas.getBoundingClientRect();
+        this.isDrawing = true;
+        this.canvasRect = rect; // Store for use in draw method
+        
+        // Get mouse position relative to canvas, accounting for any scroll
+        this.startX = e.clientX - rect.left;
+        this.startY = e.clientY - rect.top;
+        
+        // Clamp to canvas bounds
+        this.startX = Math.max(0, Math.min(this.startX, this.canvas.width));
+        this.startY = Math.max(0, Math.min(this.startY, this.canvas.height));
+        
+        this.endX = this.startX;
+        this.endY = this.startY;
+        
+        // Add document-level listeners for tracking mouse outside canvas
+        document.addEventListener('mousemove', this.documentMouseMove);
+        document.addEventListener('mouseup', this.documentMouseUp);
+    }
+    
+    draw(e) {
+        if (!this.isDrawing) return;
+        
+        e.preventDefault();
+        // Use stored canvas rect or get new one
+        const rect = this.canvasRect || this.canvas.getBoundingClientRect();
+        
+        // Get mouse position relative to canvas
+        this.endX = e.clientX - rect.left;
+        this.endY = e.clientY - rect.top;
+        
+        // Clamp to canvas bounds - this allows tracking outside but constrains to edges
+        this.endX = Math.max(0, Math.min(this.endX, this.canvas.width));
+        this.endY = Math.max(0, Math.min(this.endY, this.canvas.height));
+        
+        // Apply ratio constraint if set
+        if (this.ratio > 0) {
+            const width = Math.abs(this.endX - this.startX);
+            const height = width / this.ratio;
+            this.endY = this.startY + (this.endY > this.startY ? height : -height);
+            
+            // Clamp again after ratio adjustment
+            this.endY = Math.max(0, Math.min(this.endY, this.canvas.height));
+        }
+        
+        this.redrawSelection();
+        this.updatePreview();
+        this.updateCoords();
+    }
+    
+    endDraw() {
+        this.isDrawing = false;
+        
+        // Remove document-level listeners
+        document.removeEventListener('mousemove', this.documentMouseMove);
+        document.removeEventListener('mouseup', this.documentMouseUp);
+    }
+    
+    redrawSelection() {
+        // Clear and redraw image
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.drawImage(this.image, 0, 0, this.canvas.width, this.canvas.height);
+        
+        if (Math.abs(this.endX - this.startX) < 5 || Math.abs(this.endY - this.startY) < 5) {
+            return;
+        }
+        
+        // Draw selection rectangle
+        const x = Math.min(this.startX, this.endX);
+        const y = Math.min(this.startY, this.endY);
+        const width = Math.abs(this.endX - this.startX);
+        const height = Math.abs(this.endY - this.startY);
+        
+        // Semi-transparent overlay
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Clear selection area
+        this.ctx.clearRect(x, y, width, height);
+        this.ctx.drawImage(this.image, 
+            x / this.scale, y / this.scale, width / this.scale, height / this.scale,
+            x, y, width, height);
+        
+        // Draw border
+        this.ctx.strokeStyle = '#667eea';
+        this.ctx.lineWidth = 2;
+        this.ctx.setLineDash([5, 5]);
+        this.ctx.strokeRect(x, y, width, height);
+        this.ctx.setLineDash([]);
+    }
+    
+    updatePreview() {
+        const x = Math.min(this.startX, this.endX);
+        const y = Math.min(this.startY, this.endY);
+        const width = Math.abs(this.endX - this.startX);
+        const height = Math.abs(this.endY - this.startY);
+        
+        if (width < 5 || height < 5) return;
+        
+        // Set preview canvas size
+        const maxPreviewSize = 180;
+        let previewWidth = width;
+        let previewHeight = height;
+        
+        if (previewWidth > maxPreviewSize || previewHeight > maxPreviewSize) {
+            const scale = Math.min(maxPreviewSize / previewWidth, maxPreviewSize / previewHeight);
+            previewWidth = Math.round(previewWidth * scale);
+            previewHeight = Math.round(previewHeight * scale);
+        }
+        
+        this.previewCanvas.width = previewWidth;
+        this.previewCanvas.height = previewHeight;
+        
+        // Draw preview
+        this.previewCtx.drawImage(this.image,
+            x / this.scale, y / this.scale, width / this.scale, height / this.scale,
+            0, 0, previewWidth, previewHeight);
+    }
+    
+    updateCoords() {
+        const x = Math.min(this.startX, this.endX);
+        const y = Math.min(this.startY, this.endY);
+        const width = Math.abs(this.endX - this.startX);
+        const height = Math.abs(this.endY - this.startY);
+        
+        const realX = Math.round(x / this.scale);
+        const realY = Math.round(y / this.scale);
+        const realWidth = Math.round(width / this.scale);
+        const realHeight = Math.round(height / this.scale);
+        
+        this.coordsDiv.innerHTML = `
+            위치: ${realX}, ${realY}<br>
+            크기: ${realWidth} × ${realHeight}px
+        `;
+    }
+    
+    clearSelection() {
+        this.startX = 0;
+        this.startY = 0;
+        this.endX = 0;
+        this.endY = 0;
+        this.coordsDiv.innerHTML = '';
+        if (this.image) {
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.ctx.drawImage(this.image, 0, 0, this.canvas.width, this.canvas.height);
+        }
+        this.previewCtx.clearRect(0, 0, this.previewCanvas.width, this.previewCanvas.height);
+    }
+    
+    async applyCrop() {
+        const x = Math.min(this.startX, this.endX);
+        const y = Math.min(this.startY, this.endY);
+        const width = Math.abs(this.endX - this.startX);
+        const height = Math.abs(this.endY - this.startY);
+        
+        if (width < 5 || height < 5) {
+            alert('크롭 영역을 선택해주세요.');
+            return;
+        }
+        
+        // Calculate crop parameters for WASM
+        const realX = Math.round(x / this.scale);
+        const realY = Math.round(y / this.scale);
+        const realWidth = Math.round(width / this.scale);
+        const realHeight = Math.round(height / this.scale);
+        
+        try {
+            // Call WebAssembly crop function
+            const cropOptions = {
+                resize: false,
+                crop: true,
+                dpi: false,
+                width: 0,
+                height: 0,
+                cropTop: realY.toString(),
+                cropRight: (this.image.width - realX - realWidth).toString(),
+                cropBottom: (this.image.height - realY - realHeight).toString(),
+                cropLeft: realX.toString()
+            };
+            
+            console.log('Crop options:', cropOptions);
+            
+            const result = window.processImage(this.imageData, cropOptions);
+            
+            if (result.success && result.data) {
+                // Download cropped image
+                const croppedImage = {
+                    name: this.imageName.replace(/\.(jpg|jpeg|png)$/i, '_cropped.$1'),
+                    data: result.data
+                };
+                downloadImage(croppedImage);
+                this.close();
+            } else {
+                alert('크롭 처리 실패: ' + (result.error || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Crop error:', error);
+            alert('크롭 처리 중 오류가 발생했습니다.');
+        }
+    }
+}
+
+// Initialize crop dialog
+let cropDialog;
+
+// Open crop dialog
+function openCropDialog(image) {
+    if (!cropDialog) {
+        cropDialog = new CropDialog();
+    }
+    cropDialog.open(image.data, image.name);
 }
