@@ -2,6 +2,44 @@
 
 미리캔버스(MiriCanvas)에 최적화된 이미지 변환 도구입니다.
 
+## 빠른 설치
+
+### macOS
+
+```bash
+# Intel Mac
+curl -L https://github.com/pyhub-apps/pyhub-imagekit/releases/latest/download/imagekit-darwin-amd64 -o imagekit
+chmod +x imagekit
+sudo mv imagekit /usr/local/bin/
+
+# Apple Silicon (M1/M2)
+curl -L https://github.com/pyhub-apps/pyhub-imagekit/releases/latest/download/imagekit-darwin-arm64 -o imagekit
+chmod +x imagekit
+sudo mv imagekit /usr/local/bin/
+```
+
+### Windows
+
+PowerShell을 관리자 권한으로 실행:
+
+```powershell
+# Windows (x64)
+Invoke-WebRequest -Uri "https://github.com/pyhub-apps/pyhub-imagekit/releases/latest/download/imagekit-windows-amd64.exe" -OutFile "imagekit.exe"
+Move-Item -Path "imagekit.exe" -Destination "C:\Windows\System32\imagekit.exe"
+
+# 또는 사용자 폴더에 설치
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\bin"
+Invoke-WebRequest -Uri "https://github.com/pyhub-apps/pyhub-imagekit/releases/latest/download/imagekit-windows-amd64.exe" -OutFile "$env:USERPROFILE\bin\imagekit.exe"
+# 환경 변수에 경로 추가 (한 번만 실행)
+[Environment]::SetEnvironmentVariable("Path", $env:Path + ";$env:USERPROFILE\bin", [EnvironmentVariableTarget]::User)
+```
+
+### 설치 확인
+
+```bash
+imagekit --version
+```
+
 ## 주요 기능
 
 - ✅ **이미지 크기 변환**: 원하는 픽셀 크기나 비율로 이미지 리사이징
@@ -12,9 +50,9 @@
 - ✅ **형식 지원**: JPG, PNG 이미지 지원
 - ✅ **고품질 변환**: 이미지 품질 손실 최소화
 
-## 설치
+## 소스에서 빌드
 
-### 소스에서 빌드
+### 빌드 방법
 
 ```bash
 # 저장소 클론
