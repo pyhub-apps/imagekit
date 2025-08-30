@@ -70,54 +70,80 @@ function setupEventListeners() {
     loadSavedOptions();
     
     // File upload
-    uploadArea.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', handleFileSelect);
-    
-    // Drag and drop
-    uploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        uploadArea.classList.add('dragover');
-    });
-    
-    uploadArea.addEventListener('dragleave', () => {
-        uploadArea.classList.remove('dragover');
-    });
-    
-    uploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        uploadArea.classList.remove('dragover');
-        handleFiles(e.dataTransfer.files);
-    });
+    if (uploadArea && fileInput) {
+        uploadArea.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+    }
     
     // Options toggles with auto-save
-    document.getElementById('enableResize').addEventListener('change', (e) => {
-        if (e.target.checked) {
-            document.getElementById('resizeOptions').classList.remove('hidden');
-        } else {
-            document.getElementById('resizeOptions').classList.add('hidden');
-        }
-        saveOptions();
-    });
+    const enableResize = document.getElementById('enableResize');
+    const resizeOptions = document.getElementById('resizeOptions');
+    if (enableResize && resizeOptions) {
+        enableResize.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                resizeOptions.classList.remove('hidden');
+            } else {
+                resizeOptions.classList.add('hidden');
+            }
+            saveOptions();
+        });
+    }
     
-    document.getElementById('enableDPI').addEventListener('change', (e) => {
-        if (e.target.checked) {
-            document.getElementById('dpiOptions').classList.remove('hidden');
-        } else {
-            document.getElementById('dpiOptions').classList.add('hidden');
-        }
-        saveOptions();
-    });
+    const enableDPI = document.getElementById('enableDPI');
+    const dpiOptions = document.getElementById('dpiOptions');
+    if (enableDPI && dpiOptions) {
+        enableDPI.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                dpiOptions.classList.remove('hidden');
+            } else {
+                dpiOptions.classList.add('hidden');
+            }
+            saveOptions();
+        });
+    }
     
     // Save options on input change
-    document.getElementById('resizeWidth').addEventListener('input', saveOptions);
-    document.getElementById('resizeHeight').addEventListener('input', saveOptions);
-    document.getElementById('dpiValue').addEventListener('change', saveOptions);
+    const resizeWidth = document.getElementById('resizeWidth');
+    const resizeHeight = document.getElementById('resizeHeight');
+    const dpiValue = document.getElementById('dpiValue');
+    
+    if (resizeWidth) {
+        resizeWidth.addEventListener('input', saveOptions);
+    }
+    if (resizeHeight) {
+        resizeHeight.addEventListener('input', saveOptions);
+    }
+    if (dpiValue) {
+        dpiValue.addEventListener('change', saveOptions);
+    }
     
     // Process button
-    document.getElementById('processBtn').addEventListener('click', processImages);
+    const processBtn = document.getElementById('processBtn');
+    if (processBtn) {
+        processBtn.addEventListener('click', processImages);
+    }
     
     // Download all button
-    document.getElementById('downloadAllBtn').addEventListener('click', downloadAll);
+    const downloadAllBtn = document.getElementById('downloadAllBtn');
+    if (downloadAllBtn) {
+        downloadAllBtn.addEventListener('click', downloadAll);
+    }
 }
 
 // Load saved options from localStorage
@@ -129,23 +155,45 @@ function loadSavedOptions() {
             const options = JSON.parse(saved);
             
             // Load resize options
-            document.getElementById('enableResize').checked = options.enableResize !== false; // Default true
-            document.getElementById('resizeWidth').value = options.resizeWidth || '';
-            document.getElementById('resizeHeight').value = options.resizeHeight || '';
-            if (options.enableResize !== false) {
-                document.getElementById('resizeOptions').classList.remove('hidden');
-            } else {
-                document.getElementById('resizeOptions').classList.add('hidden');
+            const enableResize = document.getElementById('enableResize');
+            const resizeWidth = document.getElementById('resizeWidth');
+            const resizeHeight = document.getElementById('resizeHeight');
+            const resizeOptions = document.getElementById('resizeOptions');
+            
+            if (enableResize) {
+                enableResize.checked = options.enableResize !== false; // Default true
+            }
+            if (resizeWidth) {
+                resizeWidth.value = options.resizeWidth || '';
+            }
+            if (resizeHeight) {
+                resizeHeight.value = options.resizeHeight || '';
+            }
+            if (resizeOptions) {
+                if (options.enableResize !== false) {
+                    resizeOptions.classList.remove('hidden');
+                } else {
+                    resizeOptions.classList.add('hidden');
+                }
             }
             
-            
             // Load DPI options
-            document.getElementById('enableDPI').checked = options.enableDPI !== false; // Default true
-            document.getElementById('dpiValue').value = options.dpiValue || '300';
-            if (options.enableDPI !== false) {
-                document.getElementById('dpiOptions').classList.remove('hidden');
-            } else {
-                document.getElementById('dpiOptions').classList.add('hidden');
+            const enableDPI = document.getElementById('enableDPI');
+            const dpiValue = document.getElementById('dpiValue');
+            const dpiOptions = document.getElementById('dpiOptions');
+            
+            if (enableDPI) {
+                enableDPI.checked = options.enableDPI !== false; // Default true
+            }
+            if (dpiValue) {
+                dpiValue.value = options.dpiValue || '300';
+            }
+            if (dpiOptions) {
+                if (options.enableDPI !== false) {
+                    dpiOptions.classList.remove('hidden');
+                } else {
+                    dpiOptions.classList.add('hidden');
+                }
             }
         } catch (error) {
             console.error('Failed to load saved options:', error);
@@ -158,22 +206,50 @@ function loadSavedOptions() {
 
 // Set default options for first-time users
 function setDefaultOptions() {
-    document.getElementById('enableResize').checked = true;
-    document.getElementById('resizeOptions').classList.remove('hidden');
-    document.getElementById('enableDPI').checked = true;
-    document.getElementById('dpiOptions').classList.remove('hidden');
-    document.getElementById('dpiValue').value = '300';
+    const enableResize = document.getElementById('enableResize');
+    const resizeOptions = document.getElementById('resizeOptions');
+    const enableDPI = document.getElementById('enableDPI');
+    const dpiOptions = document.getElementById('dpiOptions');
+    const dpiValue = document.getElementById('dpiValue');
+    
+    if (enableResize) {
+        enableResize.checked = true;
+    }
+    if (resizeOptions) {
+        resizeOptions.classList.remove('hidden');
+    }
+    if (enableDPI) {
+        enableDPI.checked = true;
+    }
+    if (dpiOptions) {
+        dpiOptions.classList.remove('hidden');
+    }
+    if (dpiValue) {
+        dpiValue.value = '300';
+    }
+    
     saveOptions();
 }
 
 // Save current options to localStorage
 function saveOptions() {
+    const enableResize = document.getElementById('enableResize');
+    const resizeWidth = document.getElementById('resizeWidth');
+    const resizeHeight = document.getElementById('resizeHeight');
+    const enableDPI = document.getElementById('enableDPI');
+    const dpiValue = document.getElementById('dpiValue');
+    
+    // Only save if elements exist
+    if (!enableResize || !enableDPI) {
+        return;
+    }
+    
     const options = {
-        enableResize: document.getElementById('enableResize').checked,
-        resizeWidth: document.getElementById('resizeWidth').value,
-        resizeHeight: document.getElementById('resizeHeight').value,
-        enableDPI: document.getElementById('enableDPI').checked,
-        dpiValue: document.getElementById('dpiValue').value
+        enableResize: enableResize.checked,
+        resizeWidth: resizeWidth ? resizeWidth.value : '',
+        resizeHeight: resizeHeight ? resizeHeight.value : '',
+        enableDPI: enableDPI.checked,
+        dpiValue: dpiValue ? dpiValue.value : '300'
     };
     
     localStorage.setItem('imagekitOptions', JSON.stringify(options));
