@@ -29,4 +29,5 @@ func init() {
 	rootCmd.AddCommand(watermarkCmd)
 	rootCmd.AddCommand(cropCmd)
 	rootCmd.AddCommand(infoCmd)
+	rootCmd.AddCommand(updateCmd)
 }
