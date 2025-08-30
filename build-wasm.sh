@@ -1,30 +1,44 @@
 #!/bin/bash
 
-# Cloudflare Pages Build Script
-# This script is called by Cloudflare Pages during build
+# WebAssembly build script with version injection
+# This script is used by Cloudflare Pages CI/CD
 
 set -e
 
-echo "Starting WebAssembly build..."
+# Get version from git tag or use default
+VERSION=${VERSION:-$(git describe --tags --always 2>/dev/null || echo "dev")}
+echo "Building WebAssembly with version: $VERSION"
 
-# Install Go if not available (Cloudflare Pages has it pre-installed)
-if ! command -v go &> /dev/null; then
-    echo "Go is not installed. Please ensure Go is available in the build environment."
-    exit 1
-fi
+# Create template files with version placeholders
+echo "Creating versioned files..."
 
-echo "Go version: $(go version)"
-
-# Build WebAssembly
-echo "Building WebAssembly..."
-GOOS=js GOARCH=wasm go build -o web/static/imagekit.wasm cmd/wasm/main.go
-
-if [ -f "web/static/imagekit.wasm" ]; then
-    echo "✅ WebAssembly build successful!"
-    echo "File size: $(ls -lh web/static/imagekit.wasm | awk '{print $5}')"
+# Create app.js from template
+if [ -f "web/static/app.template.js" ]; then
+    sed "s/{{VERSION}}/$VERSION/g" web/static/app.template.js > web/static/app.js
 else
-    echo "❌ WebAssembly build failed!"
-    exit 1
+    # If template doesn't exist, update existing file
+    sed -i.bak "s/const WASM_VERSION = '[^']*'/const WASM_VERSION = '$VERSION'/" web/static/app.js
+    rm -f web/static/app.js.bak
 fi
 
-echo "Build complete!"
+# Create index.html from template
+if [ -f "web/index.template.html" ]; then
+    sed "s/{{VERSION}}/$VERSION/g" web/index.template.html > web/index.html
+else
+    # If template doesn't exist, update existing file
+    sed -i.bak "s/\?v=[0-9.]*/?v=$VERSION/g" web/index.html
+    sed -i.bak "s/imagekit-version\">[^<]*/imagekit-version\">$VERSION/" web/index.html
+    rm -f web/index.html.bak
+fi
+
+# Build WASM with version
+echo "Building WASM..."
+GOOS=js GOARCH=wasm go build \
+    -ldflags="-X main.Version=$VERSION" \
+    -o web/static/imagekit.wasm \
+    cmd/wasm/main.go
+
+echo "WASM build complete!"
+ls -lh web/static/imagekit.wasm
+
+echo "Build completed successfully with version $VERSION"

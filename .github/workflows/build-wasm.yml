@@ -41,6 +41,5 @@ jobs:
     
     - name: Test WebAssembly Build
       run: |
-        GOOS=js GOARCH=wasm go build -o /tmp/imagekit.wasm cmd/wasm/main.go
+        ./build-wasm.sh
         echo "✅ WebAssembly build successful"
-        echo "Build size: $(ls -lh /tmp/imagekit.wasm | awk '{print $5}')"

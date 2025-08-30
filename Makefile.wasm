@@ -2,12 +2,15 @@
 
 .PHONY: wasm-build wasm-serve wasm-dev wasm-clean
 
-# Build WebAssembly binary
+# Build WebAssembly binary with versioning
 wasm-build:
-	@echo "Building WebAssembly..."
-	GOOS=js GOARCH=wasm go build -o web/static/imagekit.wasm cmd/wasm/main.go
-	@echo "WebAssembly build complete: web/static/imagekit.wasm"
-	@ls -lh web/static/imagekit.wasm
+	@echo "Building WebAssembly with versioning..."
+	$(eval VERSION := $(shell ./scripts/headver.sh))
+	$(eval WASM_FILE := web/static/imagekit-$(VERSION).wasm)
+	GOOS=js GOARCH=wasm go build -o $(WASM_FILE) cmd/wasm/main.go
+	@echo '{"version":"$(VERSION)","wasmFile":"static/imagekit-$(VERSION).wasm","buildTime":"'$(shell date -u +%Y-%m-%dT%H:%M:%SZ)'"}' > web/version.json
+	@echo "WebAssembly build complete: $(WASM_FILE)"
+	@ls -lh $(WASM_FILE) web/version.json
 
 # Serve WebAssembly app locally
 wasm-serve: wasm-build
@@ -20,7 +23,7 @@ wasm-dev: wasm-build wasm-serve
 
 # Clean WebAssembly build
 wasm-clean:
-	rm -f web/static/imagekit.wasm
+	rm -f web/static/imagekit*.wasm web/version.json
 	@echo "WebAssembly build cleaned"
 
 # Help

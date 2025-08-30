@@ -30,40 +30,18 @@ make -f Makefile.wasm wasm-dev
 
 테스트 페이지: http://localhost:8080/test.html
 
-## Cloudflare Pages 배포
+## 배포
 
-### 자동 배포 (GitHub Actions)
+WebAssembly 파일을 빌드한 후 `web` 디렉토리를 정적 웹 호스팅 서비스에 배포할 수 있습니다.
 
-1. Cloudflare Pages 프로젝트 생성
-2. GitHub Secrets 설정:
-   - `CLOUDFLARE_API_TOKEN`: Cloudflare API 토큰
-   - `CLOUDFLARE_ACCOUNT_ID`: Cloudflare 계정 ID
+### 빌드
 
-3. main 브랜치에 푸시하면 자동 배포
-
-### 수동 배포
-
-1. WebAssembly 빌드:
 ```bash
+# WebAssembly 빌드
 GOOS=js GOARCH=wasm go build -o web/static/imagekit.wasm cmd/wasm/main.go
-```
 
-2. Cloudflare Pages 대시보드에서:
-   - 새 프로젝트 생성
-   - `web` 디렉토리 업로드
-   - 빌드 설정 불필요 (정적 파일)
-
-### Wrangler CLI 사용
-
-```bash
-# Wrangler 설치
-npm install -g wrangler
-
-# 로그인
-wrangler login
-
-# 배포
-wrangler pages deploy web --project-name=pyhub-imagekit
+# 또는 Makefile 사용
+make -f Makefile.wasm wasm-build
 ```
 
 ## 기술 스택
@@ -71,7 +49,7 @@ wrangler pages deploy web --project-name=pyhub-imagekit
 - Go WebAssembly
 - HTML5/CSS3/JavaScript
 - 이미지 처리: disintegration/imaging
-- 호스팅: Cloudflare Pages
+- 호스팅: 정적 웹 호스팅 서비스
 
 ## 브라우저 지원
 

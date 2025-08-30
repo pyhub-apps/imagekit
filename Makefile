@@ -43,6 +43,13 @@ build-linux:
 	@GOOS=linux GOARCH=arm64 go build -o dist/${BINARY_NAME}-linux-arm64 ${MAIN_PATH}
 	@echo "Linux build complete"
 
+## build-wasm: WebAssembly 빌드
+build-wasm:
+	@echo "Building WebAssembly..."
+	@GOOS=js GOARCH=wasm go build -ldflags="-X main.Version=$$(grep 'const WASM_VERSION' web/static/app.js | sed -E \"s/.*'([0-9.]+)'.*/\1/\")" -o web/static/imagekit.wasm cmd/wasm/main.go
+	@echo "WebAssembly build complete"
+	@ls -lh web/static/imagekit.wasm
+
 ## clean: 빌드 결과물 삭제
 clean:
 	@echo "Cleaning..."
