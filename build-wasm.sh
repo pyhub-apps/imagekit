@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # WebAssembly build script with version injection
-# This script is used by Cloudflare Pages CI/CD
+# This script is used by Cloudflare Pages CI/CD and local development
 
 set -e
 

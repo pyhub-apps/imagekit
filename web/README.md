@@ -14,8 +14,8 @@
 ### 빌드 및 실행
 
 ```bash
-# WebAssembly 빌드
-GOOS=js GOARCH=wasm go build -o web/static/imagekit.wasm cmd/wasm/main.go
+# 처음 시작 시 (템플릿에서 파일 생성 및 WASM 빌드)
+./build-wasm.sh
 
 # 로컬 서버 실행
 cd web && python3 -m http.server 8080
@@ -25,6 +25,8 @@ make -f Makefile.wasm wasm-dev
 ```
 
 브라우저에서 http://localhost:8080 접속
+
+**참고**: `web/index.html`과 `web/static/app.js`는 템플릿에서 자동 생성되는 파일이므로 Git에서 추적하지 않습니다.
 
 ### 디버깅
 

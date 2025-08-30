@@ -45,3 +45,7 @@ sample/*.png
 
 # Temporary files
 cmd/generate-test-image/
+
+# Generated files from templates
+web/index.html
+web/static/app.js
