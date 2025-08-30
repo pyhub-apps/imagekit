@@ -3,8 +3,10 @@ package cli
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	
+	"github.com/allieus/pyhub-imagekit/pkg/batch"
 	"github.com/allieus/pyhub-imagekit/pkg/transform"
 	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
@@ -19,15 +21,20 @@ var (
 )
 
 var convertCmd = &cobra.Command{
-	Use:   "convert [input] [output]",
+	Use:   "convert [input-pattern or file] [output-file (optional)]",
 	Short: "이미지 변환 (크기, DPI)",
-	Long: `이미지의 크기와 DPI를 변환합니다.
+	Long: `단일 파일 또는 glob 패턴으로 여러 이미지를 변환합니다.
 	
 예제:
+  # 단일 파일 변환
   imagekit convert --width=1920 --height=1080 input.jpg output.jpg
   imagekit convert --dpi=96 input.png output.png
-  imagekit convert --width=800 --mode=fit input.jpg output.jpg`,
-	Args: cobra.ExactArgs(2),
+  
+  # 여러 파일 변환 (glob 패턴)
+  imagekit convert --width=1920 "*.jpg"              # 모든 jpg 파일
+  imagekit convert --dpi=96 "photos/*.png"           # photos 디렉토리의 png 파일들
+  imagekit convert --width=800 --height=600 "*.{jpg,png}"  # jpg와 png 파일들`,
+	Args: cobra.RangeArgs(1, 2),
 	RunE: runConvert,
 }
 
@@ -40,12 +47,89 @@ func init() {
 }
 
 func runConvert(cmd *cobra.Command, args []string) error {
-	inputPath := args[0]
-	outputPath := args[1]
+	inputPattern := args[0]
+	
+	// Check if conversion options are specified
+	if width <= 0 && height <= 0 && dpi <= 0 {
+		return fmt.Errorf("변환 옵션을 지정해주세요 (--width, --height, 또는 --dpi)")
+	}
 	
 	// Create transformer
 	transformer := transform.NewTransformer()
 	
+	// Check if it's a glob pattern or contains wildcards
+	hasGlob := strings.Contains(inputPattern, "*") || strings.Contains(inputPattern, "?") || strings.Contains(inputPattern, "[")
+	
+	// Single file mode with explicit output
+	if len(args) == 2 && !hasGlob {
+		outputPath := args[1]
+		return processSingleFile(transformer, inputPattern, outputPath)
+	}
+	
+	// Check if it's a single file without glob patterns
+	if !hasGlob {
+		// Single file mode with auto-generated output name
+		if _, err := os.Stat(inputPattern); err == nil {
+			outputPath := batch.GenerateOutputPath(inputPattern)
+			return processSingleFile(transformer, inputPattern, outputPath)
+		}
+		return fmt.Errorf("파일을 찾을 수 없습니다: %s", inputPattern)
+	}
+	
+	// Batch mode
+	processor := batch.NewProcessor(transformer)
+	
+	// Prepare options
+	var resizeOptions *transform.ResizeOptions
+	if width > 0 || height > 0 {
+		resizeMode := getResizeMode(mode)
+		resizeOptions = &transform.ResizeOptions{
+			Width:   width,
+			Height:  height,
+			Mode:    resizeMode,
+			Quality: quality,
+		}
+	}
+	
+	options := batch.ProcessOptions{
+		ResizeOptions: resizeOptions,
+		DPI:           dpi,
+	}
+	
+	// Progress callback
+	fmt.Println("Converting images...")
+	progressCallback := func(current, total int, fileName string, success bool) {
+		status := "✅"
+		if !success {
+			status = "❌"
+		}
+		fmt.Printf("[%d/%d] %s → %s %s\n", current, total, fileName, 
+			strings.TrimSuffix(fileName, filepath.Ext(fileName))+"_converted"+filepath.Ext(fileName), status)
+	}
+	
+	// Process files
+	result, err := processor.ProcessFiles(inputPattern, options, progressCallback)
+	if err != nil {
+		return err
+	}
+	
+	// Show summary
+	fmt.Printf("\n완료: %d/%d 성공", result.SuccessCount, result.TotalFiles)
+	if result.HasErrors() {
+		fmt.Printf(", %d 실패\n", len(result.FailedFiles))
+		fmt.Println("\n실패한 파일:")
+		for _, failed := range result.FailedFiles {
+			fmt.Printf("  - %s: %v\n", failed.Path, failed.Error)
+		}
+	} else {
+		fmt.Println()
+	}
+	
+	return nil
+}
+
+// processSingleFile handles single file conversion
+func processSingleFile(transformer *transform.Transformer, inputPath, outputPath string) error {
 	// Show progress
 	bar := progressbar.Default(-1, "이미지 변환 중...")
 	
@@ -126,8 +210,6 @@ func runConvert(cmd *cobra.Command, args []string) error {
 		if err := transformer.SetDPI(inputFile, outputFile, dpi); err != nil {
 			return fmt.Errorf("DPI 설정 실패: %w", err)
 		}
-	} else {
-		return fmt.Errorf("변환 옵션을 지정해주세요 (--width, --height, 또는 --dpi)")
 	}
 	
 	bar.Finish()
