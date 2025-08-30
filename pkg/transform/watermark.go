@@ -120,7 +120,9 @@ func inpaintArea(img image.Image, area Rectangle) (image.Image, error) {
 	draw.Draw(result, fillRect, &image.Uniform{avgColor}, image.Point{}, draw.Src)
 	
 	// Apply slight blur to blend better
-	result = imaging.Blur(result, 1.0)
+	blurred := imaging.Blur(result, 1.0)
+	result = image.NewRGBA(blurred.Bounds())
+	draw.Draw(result, result.Bounds(), blurred, image.Point{}, draw.Src)
 	
 	return result, nil
 }
@@ -282,7 +284,8 @@ func SmartWatermarkRemoval(img image.Image, area Rectangle) (image.Image, error)
 		}
 		
 		if currentArea.Width > 0 && currentArea.Height > 0 {
-			result, _ = applyBlurToArea(result, currentArea, &WatermarkRemovalOptions{BlurRadius: blurRadius})
+			blurredResult, _ := applyBlurToArea(result, currentArea, &WatermarkRemovalOptions{BlurRadius: blurRadius})
+			result = imaging.Clone(blurredResult)
 		}
 	}
 	

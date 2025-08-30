@@ -1,6 +1,7 @@
 package transform
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 )
@@ -37,21 +38,20 @@ func (t *Transformer) Resize(input io.Reader, output io.Writer, options ResizeOp
 
 // SetDPI implements DPI metadata setting functionality
 func (t *Transformer) SetDPI(input io.Reader, output io.Writer, dpi int) error {
-	// Load the image
+	// First detect the format
 	img, format, err := LoadImage(input)
 	if err != nil {
 		return fmt.Errorf("failed to load image: %w", err)
 	}
 	
-	// For now, we'll implement the actual DPI setting in dpi.go
-	// This is just the interface implementation
-	imgWithDPI, err := setImageDPI(img, format, dpi)
-	if err != nil {
-		return fmt.Errorf("failed to set DPI: %w", err)
+	// Save the image back to get raw data
+	buf := &bytes.Buffer{}
+	if err := SaveImage(buf, img, format, 95); err != nil {
+		return fmt.Errorf("failed to encode image: %w", err)
 	}
 	
-	// Save the image with updated DPI
-	return SaveImage(output, imgWithDPI, format, 95)
+	// Process with DPI
+	return ProcessImageWithDPI(bytes.NewReader(buf.Bytes()), output, format, dpi)
 }
 
 // RemoveWatermark implements watermark removal functionality
@@ -77,20 +77,4 @@ func (t *Transformer) RemoveWatermark(input io.Reader, output io.Writer, area Re
 	
 	// Save the processed image
 	return SaveImage(output, processedImg, format, 95)
-}
-
-// Placeholder functions - these will be implemented in separate files
-func resizeImage(img image.Image, width, height int, mode ResizeMode) (image.Image, error) {
-	// Placeholder - will be implemented in resize.go
-	return img, nil
-}
-
-func setImageDPI(img image.Image, format ImageFormat, dpi int) (image.Image, error) {
-	// Placeholder - will be implemented in dpi.go
-	return img, nil
-}
-
-func removeWatermarkFromArea(img image.Image, area Rectangle) (image.Image, error) {
-	// Placeholder - will be implemented in watermark.go
-	return img, nil
 }
