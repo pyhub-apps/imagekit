@@ -1,0 +1,46 @@
+name: Test WebAssembly Build
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'cmd/wasm/**'
+      - 'pkg/**'
+      - '.github/workflows/build-wasm.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'cmd/wasm/**'
+      - 'pkg/**'
+
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Setup Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.21'
+    
+    - name: Cache Go modules
+      uses: actions/cache@v3
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+    
+    - name: Download dependencies
+      run: go mod download
+    
+    - name: Test WebAssembly Build
+      run: |
+        GOOS=js GOARCH=wasm go build -o /tmp/imagekit.wasm cmd/wasm/main.go
+        echo "✅ WebAssembly build successful"
+        echo "Build size: $(ls -lh /tmp/imagekit.wasm | awk '{print $5}')"

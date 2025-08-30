@@ -34,3 +34,14 @@ Thumbs.db
 # Output directories
 dist/
 build/
+
+# WebAssembly artifacts
+web/static/imagekit.wasm
+
+# Test images
+sample/*.jpg
+sample/*.png
+!sample/README.md
+
+# Temporary files
+cmd/generate-test-image/
