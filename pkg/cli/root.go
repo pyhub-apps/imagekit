@@ -27,5 +27,6 @@ func init() {
 	// Add subcommands
 	rootCmd.AddCommand(convertCmd)
 	rootCmd.AddCommand(watermarkCmd)
+	rootCmd.AddCommand(cropCmd)
 	rootCmd.AddCommand(infoCmd)
 }

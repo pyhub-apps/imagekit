@@ -77,3 +77,27 @@ func (t *Transformer) RemoveWatermark(input io.Reader, output io.Writer, area Re
 	// Save the processed image
 	return SaveImage(output, processedImg, format, 95)
 }
+
+// CropEdges implements edge cropping functionality
+func (t *Transformer) CropEdges(input io.Reader, output io.Writer, options EdgeCropOptions) error {
+	// Load the image
+	img, format, err := LoadImage(input)
+	if err != nil {
+		return fmt.Errorf("failed to load image: %w", err)
+	}
+	
+	// Validate crop options
+	info := GetImageInfo(img, format)
+	if err := ValidateCropOptions(options, info.Width, info.Height); err != nil {
+		return fmt.Errorf("invalid crop options: %w", err)
+	}
+	
+	// Perform the crop
+	croppedImg, err := CropEdges(img, options)
+	if err != nil {
+		return fmt.Errorf("failed to crop image: %w", err)
+	}
+	
+	// Save the cropped image
+	return SaveImage(output, croppedImg, format, 95)
+}

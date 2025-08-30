@@ -7,6 +7,8 @@
 - ✅ **이미지 크기 변환**: 원하는 픽셀 크기나 비율로 이미지 리사이징
 - ✅ **DPI 변환**: 72, 96, 150, 300 DPI로 변환
 - ✅ **워터마크 제거**: 지정 영역 블러/채우기 처리
+- ✅ **가장자리 크롭**: 이미지 가장자리 제거 (워터마크/여백 제거용)
+- ✅ **배치 처리**: glob 패턴으로 여러 파일 동시 처리
 - ✅ **형식 지원**: JPG, PNG 이미지 지원
 - ✅ **고품질 변환**: 이미지 품질 손실 최소화
 
@@ -81,6 +83,36 @@ imagekit convert --dpi=72 input.jpg output.jpg
 imagekit convert --width=1920 --height=1080 --dpi=96 input.jpg output.jpg
 ```
 
+### 배치 처리 (여러 파일 동시 변환)
+
+```bash
+# 모든 JPG 파일을 1920픽셀 너비로 변환
+imagekit convert --width=1920 "*.jpg"
+
+# 디렉토리의 모든 PNG 파일 DPI 변환
+imagekit convert --dpi=96 "images/*.png"
+
+# 여러 파일 크기 조정 (결과: image1_converted.jpg, image2_converted.jpg ...)
+imagekit convert --width=800 --height=600 "photos/*.jpg"
+```
+
+### 가장자리 크롭
+
+```bash
+# 하단 100픽셀 제거 (워터마크 제거용)
+imagekit crop --bottom=100 watermarked.jpg clean.jpg
+
+# 상단 10% 제거 (퍼센트 단위)
+imagekit crop --top=10% header-logo.jpg clean.jpg
+
+# 모든 가장자리에서 20픽셀씩 제거
+imagekit crop --top=20 --bottom=20 --left=20 --right=20 input.jpg output.jpg
+
+# 여러 파일 배치 크롭
+imagekit crop --bottom=50 "watermarked/*.jpg"
+imagekit crop --top=15% "photos/*.png"
+```
+
 ### 워터마크 제거
 
 ```bash
@@ -104,6 +136,15 @@ imagekit watermark --area=100,100,200,50 --method=inpaint input.jpg output.jpg
 | `--dpi` | 목표 DPI | - |
 | `--mode` | 리사이징 모드 (fit, fill, exact) | fit |
 | `--quality` | JPEG 품질 (1-100) | 95 |
+
+### crop 명령어
+
+| 옵션 | 설명 | 기본값 |
+|------|------|--------|
+| `--top` | 상단에서 제거할 영역 (픽셀 또는 %) | - |
+| `--bottom` | 하단에서 제거할 영역 (픽셀 또는 %) | - |
+| `--left` | 좌측에서 제거할 영역 (픽셀 또는 %) | - |
+| `--right` | 우측에서 제거할 영역 (픽셀 또는 %) | - |
 
 ### watermark 명령어
 
@@ -173,6 +214,13 @@ area := transform.Rectangle{
     Height: 50,
 }
 err := transformer.RemoveWatermark(input, output, area)
+
+// 가장자리 크롭
+cropOptions := transform.EdgeCropOptions{
+    Top:    transform.CropValue{Value: 10, IsPercent: true},
+    Bottom: transform.CropValue{Value: 100, IsPercent: false},
+}
+err := transformer.CropEdges(input, output, cropOptions)
 ```
 
 ## 요구사항
