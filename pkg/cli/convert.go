@@ -43,20 +43,6 @@ func runConvert(cmd *cobra.Command, args []string) error {
 	inputPath := args[0]
 	outputPath := args[1]
 	
-	// Open input file
-	inputFile, err := os.Open(inputPath)
-	if err != nil {
-		return fmt.Errorf("입력 파일을 열 수 없습니다: %w", err)
-	}
-	defer inputFile.Close()
-	
-	// Create output file
-	outputFile, err := os.Create(outputPath)
-	if err != nil {
-		return fmt.Errorf("출력 파일을 생성할 수 없습니다: %w", err)
-	}
-	defer outputFile.Close()
-	
 	// Create transformer
 	transformer := transform.NewTransformer()
 	
@@ -65,6 +51,20 @@ func runConvert(cmd *cobra.Command, args []string) error {
 	
 	// Process based on flags
 	if width > 0 || height > 0 {
+		// Open input file for resize
+		inputFile, err := os.Open(inputPath)
+		if err != nil {
+			return fmt.Errorf("입력 파일을 열 수 없습니다: %w", err)
+		}
+		defer inputFile.Close()
+		
+		// Create output file
+		outputFile, err := os.Create(outputPath)
+		if err != nil {
+			return fmt.Errorf("출력 파일을 생성할 수 없습니다: %w", err)
+		}
+		defer outputFile.Close()
+		
 		// Resize operation
 		resizeMode := getResizeMode(mode)
 		options := transform.ResizeOptions{
@@ -107,6 +107,20 @@ func runConvert(cmd *cobra.Command, args []string) error {
 			os.Rename(outputPath+".tmp", outputPath)
 		}
 	} else if dpi > 0 {
+		// Open input file for DPI
+		inputFile, err := os.Open(inputPath)
+		if err != nil {
+			return fmt.Errorf("입력 파일을 열 수 없습니다: %w", err)
+		}
+		defer inputFile.Close()
+		
+		// Create output file
+		outputFile, err := os.Create(outputPath)
+		if err != nil {
+			return fmt.Errorf("출력 파일을 생성할 수 없습니다: %w", err)
+		}
+		defer outputFile.Close()
+		
 		// DPI only operation
 		bar.Describe("DPI 설정 중...")
 		if err := transformer.SetDPI(inputFile, outputFile, dpi); err != nil {

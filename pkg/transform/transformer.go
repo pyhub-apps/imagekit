@@ -20,8 +20,7 @@ func (t *Transformer) Resize(input io.Reader, output io.Writer, options ResizeOp
 	// Calculate target dimensions
 	targetWidth, targetHeight := CalculateDimensions(info.Width, info.Height, options)
 	
-	// For now, we'll implement the actual resizing in resize.go
-	// This is just the interface implementation
+	// Resize the image
 	resizedImg, err := resizeImage(img, targetWidth, targetHeight, options.Mode)
 	if err != nil {
 		return fmt.Errorf("failed to resize image: %w", err)

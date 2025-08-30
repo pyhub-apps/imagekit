@@ -19,8 +19,26 @@ func resizeImage(img image.Image, width, height int, mode ResizeMode) (image.Ima
 	
 	switch mode {
 	case ResizeFit:
-		// Fit the image within the specified dimensions, maintaining aspect ratio
-		return imaging.Fit(img, width, height, imaging.Lanczos), nil
+		// Resize maintaining aspect ratio
+		// If only one dimension is specified, use Resize with auto-calculation
+		if width > 0 && height <= 0 {
+			return imaging.Resize(img, width, 0, imaging.Lanczos), nil
+		} else if height > 0 && width <= 0 {
+			return imaging.Resize(img, 0, height, imaging.Lanczos), nil
+		} else {
+			// Both dimensions specified - resize to fit within bounds while maintaining aspect ratio
+			// Calculate which dimension is the limiting factor
+			ratio := float64(srcWidth) / float64(srcHeight)
+			targetRatio := float64(width) / float64(height)
+			
+			if ratio > targetRatio {
+				// Image is wider - fit to width
+				return imaging.Resize(img, width, 0, imaging.Lanczos), nil
+			} else {
+				// Image is taller - fit to height
+				return imaging.Resize(img, 0, height, imaging.Lanczos), nil
+			}
+		}
 		
 	case ResizeFill:
 		// Fill the specified dimensions, cropping if necessary
