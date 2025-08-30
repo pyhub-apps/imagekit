@@ -68,38 +68,51 @@ func GetImageInfo(img image.Image, format ImageFormat) ImageInfo {
 
 // CalculateDimensions calculates target dimensions based on resize options
 func CalculateDimensions(srcWidth, srcHeight int, opts ResizeOptions) (int, int) {
+	// Calculate actual pixel values from DimensionValue
+	var targetWidth, targetHeight int
+	
+	// Use new DimensionValue fields if available, otherwise fallback to old fields
+	if !opts.WidthDim.IsZero() || !opts.HeightDim.IsZero() {
+		targetWidth = opts.WidthDim.Calculate(srcWidth)
+		targetHeight = opts.HeightDim.Calculate(srcHeight)
+	} else {
+		// Fallback to old Width/Height fields for backward compatibility
+		targetWidth = opts.Width
+		targetHeight = opts.Height
+	}
+	
 	if opts.Mode == ResizeExact {
-		return opts.Width, opts.Height
+		return targetWidth, targetHeight
 	}
 	
 	// If both dimensions are specified
-	if opts.Width > 0 && opts.Height > 0 {
+	if targetWidth > 0 && targetHeight > 0 {
 		if opts.Mode == ResizeFit {
 			// Calculate dimensions to fit within the bounds
 			ratio := float64(srcWidth) / float64(srcHeight)
-			targetRatio := float64(opts.Width) / float64(opts.Height)
+			targetRatio := float64(targetWidth) / float64(targetHeight)
 			
 			if ratio > targetRatio {
 				// Image is wider, fit to width
-				return opts.Width, int(float64(opts.Width) / ratio)
+				return targetWidth, int(float64(targetWidth) / ratio)
 			}
 			// Image is taller, fit to height
-			return int(float64(opts.Height) * ratio), opts.Height
+			return int(float64(targetHeight) * ratio), targetHeight
 		}
 		// For ResizeFill, return the exact dimensions (cropping will be handled)
-		return opts.Width, opts.Height
+		return targetWidth, targetHeight
 	}
 	
 	// If only width is specified
-	if opts.Width > 0 {
+	if targetWidth > 0 {
 		ratio := float64(srcHeight) / float64(srcWidth)
-		return opts.Width, int(float64(opts.Width) * ratio)
+		return targetWidth, int(float64(targetWidth) * ratio)
 	}
 	
 	// If only height is specified
-	if opts.Height > 0 {
+	if targetHeight > 0 {
 		ratio := float64(srcWidth) / float64(srcHeight)
-		return int(float64(opts.Height) * ratio), opts.Height
+		return int(float64(targetHeight) * ratio), targetHeight
 	}
 	
 	// No dimensions specified, return original

@@ -60,6 +60,15 @@ imagekit convert --width=800 input.jpg output.jpg
 # 높이만 지정 (비율 유지)
 imagekit convert --height=600 input.jpg output.jpg
 
+# 배수로 크기 지정 (2배 확대)
+imagekit convert --width=2x input.jpg output.jpg    # 2배 너비
+imagekit convert --width=x2 input.jpg output.jpg    # x2 형식도 지원
+imagekit convert --width=2x --height=2x input.jpg output.jpg  # 전체 2배
+
+# 축소 (0.5배 = 절반 크기)
+imagekit convert --width=0.5x input.jpg output.jpg  # 절반 크기
+imagekit convert --width=0.25x input.jpg thumbnail.jpg  # 1/4 크기 (썸네일)
+
 # 정확한 크기로 변환 (비율 무시)
 imagekit convert --width=800 --height=600 --mode=exact input.jpg output.jpg
 
@@ -94,6 +103,12 @@ imagekit convert --dpi=96 "images/*.png"
 
 # 여러 파일 크기 조정 (결과: image1_converted.jpg, image2_converted.jpg ...)
 imagekit convert --width=800 --height=600 "photos/*.jpg"
+
+# 모든 이미지를 2배로 확대
+imagekit convert --width=2x --height=2x "*.jpg"
+
+# 썸네일 일괄 생성 (25% 크기)
+imagekit convert --width=0.25x --height=0.25x "originals/*.jpg"
 ```
 
 ### 가장자리 크롭
@@ -131,8 +146,8 @@ imagekit watermark --area=100,100,200,50 --method=inpaint input.jpg output.jpg
 
 | 옵션 | 설명 | 기본값 |
 |------|------|--------|
-| `--width` | 목표 너비 (픽셀) | - |
-| `--height` | 목표 높이 (픽셀) | - |
+| `--width` | 목표 너비 (픽셀 또는 배수: 1920, 2x, x2, 0.5x) | - |
+| `--height` | 목표 높이 (픽셀 또는 배수: 1080, 2x, x2, 0.5x) | - |
 | `--dpi` | 목표 DPI | - |
 | `--mode` | 리사이징 모드 (fit, fill, exact) | fit |
 | `--quality` | JPEG 품질 (1-100) | 95 |

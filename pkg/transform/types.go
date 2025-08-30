@@ -19,8 +19,10 @@ type ImageTransformer interface {
 
 // ResizeOptions contains options for resizing an image
 type ResizeOptions struct {
-	Width  int     // Target width in pixels (0 = auto)
-	Height int     // Target height in pixels (0 = auto)
+	Width  int     // Target width in pixels (0 = auto) - deprecated, use WidthDim
+	Height int     // Target height in pixels (0 = auto) - deprecated, use HeightDim
+	WidthDim  DimensionValue // Target width (can be pixels or multiplier)
+	HeightDim DimensionValue // Target height (can be pixels or multiplier)
 	Mode   ResizeMode // Resize mode
 	Quality int    // JPEG quality (1-100)
 }

@@ -13,8 +13,8 @@ import (
 )
 
 var (
-	width   int
-	height  int
+	width   string
+	height  string
 	dpi     int
 	mode    string
 	quality int
@@ -39,8 +39,8 @@ var convertCmd = &cobra.Command{
 }
 
 func init() {
-	convertCmd.Flags().IntVar(&width, "width", 0, "목표 너비 (픽셀)")
-	convertCmd.Flags().IntVar(&height, "height", 0, "목표 높이 (픽셀)")
+	convertCmd.Flags().StringVar(&width, "width", "", "목표 너비 (픽셀 또는 배수: 1920, 2x, x2, 0.5x)")
+	convertCmd.Flags().StringVar(&height, "height", "", "목표 높이 (픽셀 또는 배수: 1080, 2x, x2, 0.5x)")
 	convertCmd.Flags().IntVar(&dpi, "dpi", 0, "목표 DPI (72, 96, 150, 300)")
 	convertCmd.Flags().StringVar(&mode, "mode", "fit", "리사이징 모드 (fit, fill, exact)")
 	convertCmd.Flags().IntVar(&quality, "quality", 95, "JPEG 품질 (1-100)")
@@ -50,7 +50,7 @@ func runConvert(cmd *cobra.Command, args []string) error {
 	inputPattern := args[0]
 	
 	// Check if conversion options are specified
-	if width <= 0 && height <= 0 && dpi <= 0 {
+	if width == "" && height == "" && dpi <= 0 {
 		return fmt.Errorf("변환 옵션을 지정해주세요 (--width, --height, 또는 --dpi)")
 	}
 	
@@ -79,15 +79,25 @@ func runConvert(cmd *cobra.Command, args []string) error {
 	// Batch mode
 	processor := batch.NewProcessor(transformer)
 	
+	// Parse dimensions
+	widthDim, err := transform.ParseDimension(width)
+	if err != nil {
+		return fmt.Errorf("잘못된 width 값: %w", err)
+	}
+	heightDim, err := transform.ParseDimension(height)
+	if err != nil {
+		return fmt.Errorf("잘못된 height 값: %w", err)
+	}
+	
 	// Prepare options
 	var resizeOptions *transform.ResizeOptions
-	if width > 0 || height > 0 {
+	if !widthDim.IsZero() || !heightDim.IsZero() {
 		resizeMode := getResizeMode(mode)
 		resizeOptions = &transform.ResizeOptions{
-			Width:   width,
-			Height:  height,
-			Mode:    resizeMode,
-			Quality: quality,
+			WidthDim:  widthDim,
+			HeightDim: heightDim,
+			Mode:      resizeMode,
+			Quality:   quality,
 		}
 	}
 	
@@ -133,8 +143,18 @@ func processSingleFile(transformer *transform.Transformer, inputPath, outputPath
 	// Show progress
 	bar := progressbar.Default(-1, "이미지 변환 중...")
 	
+	// Parse dimensions
+	widthDim, err := transform.ParseDimension(width)
+	if err != nil {
+		return fmt.Errorf("잘못된 width 값: %w", err)
+	}
+	heightDim, err := transform.ParseDimension(height)
+	if err != nil {
+		return fmt.Errorf("잘못된 height 값: %w", err)
+	}
+	
 	// Process based on flags
-	if width > 0 || height > 0 {
+	if !widthDim.IsZero() || !heightDim.IsZero() {
 		// Open input file for resize
 		inputFile, err := os.Open(inputPath)
 		if err != nil {
@@ -152,10 +172,10 @@ func processSingleFile(transformer *transform.Transformer, inputPath, outputPath
 		// Resize operation
 		resizeMode := getResizeMode(mode)
 		options := transform.ResizeOptions{
-			Width:   width,
-			Height:  height,
-			Mode:    resizeMode,
-			Quality: quality,
+			WidthDim:  widthDim,
+			HeightDim: heightDim,
+			Mode:      resizeMode,
+			Quality:   quality,
 		}
 		
 		bar.Describe("크기 변환 중...")
