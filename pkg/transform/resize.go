@@ -9,6 +9,11 @@ import (
 
 // resizeImage resizes an image to the specified dimensions using the given mode
 func resizeImage(img image.Image, width, height int, mode ResizeMode) (image.Image, error) {
+	// Check for negative dimensions
+	if width < 0 || height < 0 {
+		return nil, fmt.Errorf("dimensions cannot be negative")
+	}
+	
 	if width <= 0 && height <= 0 {
 		return nil, fmt.Errorf("at least one dimension must be specified")
 	}

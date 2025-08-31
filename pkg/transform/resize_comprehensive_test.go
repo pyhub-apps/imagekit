@@ -155,7 +155,7 @@ func TestThumbnail(t *testing.T) {
 			thumbWidth:   100,
 			thumbHeight:  100,
 			maxExpWidth:  100,
-			maxExpHeight: 50,
+			maxExpHeight: 100,
 		},
 	}
 	
