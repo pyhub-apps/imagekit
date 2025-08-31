@@ -17,24 +17,20 @@ fi
 echo "Generating PWA icons with transparent background..."
 
 # Create a rounded rectangle icon with gradient and transparent background (512x512)
+# The icon itself has a gradient background, white elements stay white
 convert -size 512x512 xc:transparent \
-    \( -size 412x412 \
-       -define gradient:angle=45 \
-       gradient:'#667eea-#764ba2' \
-       -gravity center \
+    \( -size 412x412 xc:transparent \
+       -draw "roundrectangle 0,0,412,412,60,60" \
+       -fill gradient:'#667eea-#764ba2' \
+       -draw "color 0,0 reset" \
+       -draw "roundrectangle 0,0,412,412,60,60" \
     \) \
-    -gravity center -geometry +0+0 -composite \
-    \( -size 512x512 xc:transparent \
-       -fill white \
-       -draw "roundrectangle 50,50,462,462,60,60" \
-    \) \
-    -compose DstIn -composite \
+    -gravity center -composite \
     -gravity center \
     -fill white \
     -font Arial-Bold \
     -pointsize 200 \
     -annotate +0+0 '📷' \
-    -background transparent \
     $ICON_DIR/icon-512x512.png
 
 echo "Generated icon-512x512.png with transparent background"
