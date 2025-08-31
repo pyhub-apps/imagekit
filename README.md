@@ -1,5 +1,8 @@
 # ImageKit - 이미지 변환 CLI 도구
 
+> 🌐 **웹에서 바로 사용하기**: [https://pyhub-imagekit.pages.dev](https://pyhub-imagekit.pages.dev)  
+> 설치 없이 브라우저에서 직접 이미지를 변환할 수 있습니다! (WebAssembly 버전)
+
 미리캔버스(MiriCanvas)에 최적화된 이미지 변환 도구입니다.
 
 ## 빠른 설치
@@ -14,6 +17,20 @@ sudo mv imagekit /usr/local/bin/
 
 # Apple Silicon (M1/M2)
 curl -L https://github.com/pyhub-apps/pyhub-imagekit/releases/latest/download/imagekit-darwin-arm64 -o imagekit
+chmod +x imagekit
+sudo mv imagekit /usr/local/bin/
+```
+
+### Linux
+
+```bash
+# x64 (Intel/AMD)
+curl -L https://github.com/pyhub-apps/pyhub-imagekit/releases/latest/download/imagekit-linux-amd64 -o imagekit
+chmod +x imagekit
+sudo mv imagekit /usr/local/bin/
+
+# ARM64 (Raspberry Pi 4, ARM servers)
+curl -L https://github.com/pyhub-apps/pyhub-imagekit/releases/latest/download/imagekit-linux-arm64 -o imagekit
 chmod +x imagekit
 sudo mv imagekit /usr/local/bin/
 ```
@@ -122,6 +139,12 @@ imagekit convert --dpi=96 input.jpg output.jpg
 
 # DPI를 72로 변환 (웹용)
 imagekit convert --dpi=72 input.jpg output.jpg
+
+# DPI를 150으로 변환 (고품질 인쇄용)
+imagekit convert --dpi=150 input.jpg output.jpg
+
+# DPI를 300으로 변환 (전문 인쇄용)
+imagekit convert --dpi=300 input.jpg output.jpg
 ```
 
 ### 크기와 DPI 동시 변환
@@ -164,6 +187,19 @@ imagekit crop --top=20 --bottom=20 --left=20 --right=20 input.jpg output.jpg
 # 여러 파일 배치 크롭
 imagekit crop --bottom=50 "watermarked/*.jpg"
 imagekit crop --top=15% "photos/*.png"
+```
+
+### 품질 설정
+
+```bash
+# JPEG 품질 설정 (1-100, 기본값: 95)
+imagekit convert --width=1920 --quality=85 input.jpg output.jpg
+
+# 최고 품질로 변환
+imagekit convert --width=1920 --quality=100 input.jpg output.jpg
+
+# 웹용 최적화 (파일 크기 감소)
+imagekit convert --width=1200 --quality=75 input.jpg output.jpg
 ```
 
 ## 명령어 옵션
