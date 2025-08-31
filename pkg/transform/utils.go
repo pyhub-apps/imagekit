@@ -7,9 +7,11 @@ import (
 	"image/jpeg"
 	"image/png"
 	"io"
+	
+	"github.com/disintegration/imaging"
 )
 
-// LoadImage loads an image from a reader
+// LoadImage loads an image from a reader and automatically corrects EXIF orientation
 func LoadImage(r io.Reader) (image.Image, ImageFormat, error) {
 	// Read all data into buffer for format detection
 	buf := &bytes.Buffer{}
@@ -17,10 +19,40 @@ func LoadImage(r io.Reader) (image.Image, ImageFormat, error) {
 		return nil, "", fmt.Errorf("failed to read image data: %w", err)
 	}
 	
-	// Try to decode the image
-	img, format, err := image.Decode(bytes.NewReader(buf.Bytes()))
+	// Create a new reader from buffer
+	reader := bytes.NewReader(buf.Bytes())
+	
+	// Try to decode the image with EXIF orientation support
+	// The imaging library's Open function handles EXIF orientation automatically,
+	// but we need to decode from a reader, so we'll use DecodeWithOrientation
+	img, err := imaging.Decode(reader, imaging.AutoOrientation(true))
 	if err != nil {
-		return nil, "", fmt.Errorf("failed to decode image: %w", err)
+		// If imaging.Decode fails, try standard image.Decode as fallback
+		reader.Seek(0, 0)
+		standardImg, format, decodeErr := image.Decode(reader)
+		if decodeErr != nil {
+			return nil, "", fmt.Errorf("failed to decode image: %w", decodeErr)
+		}
+		
+		// Convert format string to our ImageFormat type
+		var imgFormat ImageFormat
+		switch format {
+		case "jpeg", "jpg":
+			imgFormat = FormatJPEG
+		case "png":
+			imgFormat = FormatPNG
+		default:
+			return nil, "", fmt.Errorf("unsupported image format: %s", format)
+		}
+		
+		return standardImg, imgFormat, nil
+	}
+	
+	// Detect format from the buffer
+	reader.Seek(0, 0)
+	_, format, err := image.DecodeConfig(reader)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to detect image format: %w", err)
 	}
 	
 	// Convert format string to our ImageFormat type

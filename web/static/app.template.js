@@ -104,67 +104,110 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize crop dialog
     cropDialog = new CropDialog();
     
+    // Check if app is running in standalone mode (PWA)
+    const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches || 
+                               window.navigator.standalone || 
+                               document.referrer.includes('android-app://');
+    
     // Add install prompt handler for PWA
     let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        
-        // Show install banner if not already installed
-        const installBanner = document.getElementById('installPWA');
-        const installBtn = document.getElementById('installBtn');
-        const dismissBtn = document.getElementById('dismissBtn');
-        
-        if (installBanner) {
-            // Show the banner
-            installBanner.style.display = 'block';
+    
+    // Only set up install prompt if not already in PWA mode
+    if (!isInStandaloneMode) {
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
             
-            // Handle install button click
+            // Get elements
+            const container = document.getElementById('installPWAContainer');
+            const fab = document.getElementById('installPWAFab');
+            const expanded = document.getElementById('installPWAExpanded');
+            const installBtn = document.getElementById('installBtn');
+            const minimizeBtn = document.getElementById('minimizeBtn');
+            
+            if (container && fab && expanded) {
+                // Show the FAB container
+                container.style.display = 'block';
+            
+            // Check if user has previously minimized (not permanently dismissed)
+            const wasMinimized = localStorage.getItem('pwa-install-minimized');
+            
+            // Show expanded view initially for first-time users
+            if (!wasMinimized) {
+                setTimeout(() => {
+                    expanded.style.display = 'block';
+                    // Auto-minimize after 8 seconds if not interacted
+                    setTimeout(() => {
+                        if (expanded.style.display === 'block') {
+                            expanded.style.display = 'none';
+                            localStorage.setItem('pwa-install-minimized', 'true');
+                        }
+                    }, 8000);
+                }, 1000); // Show after 1 second delay
+            }
+            
+            // FAB click handler - toggle expanded view
+            fab.addEventListener('click', () => {
+                if (expanded.style.display === 'none') {
+                    expanded.style.display = 'block';
+                    // Add scale animation
+                    expanded.style.transform = 'scale(0.8)';
+                    expanded.style.opacity = '0';
+                    setTimeout(() => {
+                        expanded.style.transform = 'scale(1)';
+                        expanded.style.opacity = '1';
+                    }, 10);
+                } else {
+                    expanded.style.transform = 'scale(0.8)';
+                    expanded.style.opacity = '0';
+                    setTimeout(() => {
+                        expanded.style.display = 'none';
+                        expanded.style.transform = 'scale(1)';
+                        expanded.style.opacity = '1';
+                    }, 300);
+                }
+            });
+            
+            // Install button handler
             if (installBtn) {
                 installBtn.addEventListener('click', async () => {
                     if (deferredPrompt) {
                         deferredPrompt.prompt();
                         const { outcome } = await deferredPrompt.userChoice;
                         console.log('Install prompt outcome:', outcome);
-                        deferredPrompt = null;
-                        installBanner.style.display = 'none';
                         
-                        // Store that user has seen the prompt
-                        localStorage.setItem('pwa-install-dismissed', 'true');
+                        if (outcome === 'accepted') {
+                            // Hide the FAB after successful installation
+                            container.style.display = 'none';
+                            localStorage.setItem('pwa-installed', 'true');
+                        } else {
+                            // User declined, just minimize
+                            expanded.style.display = 'none';
+                        }
+                        
+                        deferredPrompt = null;
                     }
                 });
             }
             
-            // Handle dismiss button click
-            if (dismissBtn) {
-                dismissBtn.addEventListener('click', () => {
-                    installBanner.style.display = 'none';
-                    // Remember dismissal for this session
-                    sessionStorage.setItem('pwa-install-dismissed', 'true');
-                });
-            }
-            
-            // Auto-hide after 10 seconds if not interacted
-            setTimeout(() => {
-                if (installBanner.style.display !== 'none') {
-                    installBanner.style.opacity = '0';
+            // Minimize button handler
+            if (minimizeBtn) {
+                minimizeBtn.addEventListener('click', () => {
+                    expanded.style.transform = 'scale(0.8)';
+                    expanded.style.opacity = '0';
                     setTimeout(() => {
-                        installBanner.style.display = 'none';
-                        installBanner.style.opacity = '1';
-                    }, 500);
-                }
-            }, 10000);
-            
-            // Don't show if dismissed in this session
-            if (sessionStorage.getItem('pwa-install-dismissed') === 'true') {
-                installBanner.style.display = 'none';
+                        expanded.style.display = 'none';
+                        expanded.style.transform = 'scale(1)';
+                        expanded.style.opacity = '1';
+                    }, 300);
+                    localStorage.setItem('pwa-install-minimized', 'true');
+                });
             }
         }
     });
-    
-    // Check if app is installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-        console.log('App is running in standalone mode');
+    } else {
+        // App is already running in PWA mode
+        console.log('App is running in standalone/PWA mode - install button hidden');
     }
 });
 
