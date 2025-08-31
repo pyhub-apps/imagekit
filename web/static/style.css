@@ -474,6 +474,8 @@ footer a:hover {
     padding: 20px;
     flex: 1;
     overflow: auto;
+    /* Prevent unwanted touch behaviors on mobile */
+    -webkit-overflow-scrolling: touch;
     display: flex;
     gap: 20px;
 }
@@ -489,6 +491,13 @@ footer a:hover {
     border: 1px solid #ddd;
     cursor: crosshair;
     display: block;
+    /* Touch handling for mobile devices */
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .crop-info {

@@ -796,8 +796,14 @@ class CropDialog {
         document.getElementById('cropCancel').addEventListener('click', () => this.close());
         document.getElementById('cropApply').addEventListener('click', () => this.applyCrop());
         
-        // Canvas events - only mousedown on canvas
+        // Canvas events - mouse events
         this.canvas.addEventListener('mousedown', (e) => this.startDraw(e));
+        
+        // Canvas events - touch events for mobile/iOS
+        this.canvas.addEventListener('touchstart', (e) => this.startDrawTouch(e), { passive: false });
+        this.canvas.addEventListener('touchmove', (e) => this.drawTouch(e), { passive: false });
+        this.canvas.addEventListener('touchend', (e) => this.endDrawTouch(e), { passive: false });
+        this.canvas.addEventListener('touchcancel', (e) => this.endDrawTouch(e), { passive: false });
         
         // Document-level events for mousemove and mouseup to track outside canvas
         this.documentMouseMove = (e) => this.draw(e);
@@ -934,6 +940,70 @@ class CropDialog {
         // Remove document-level listeners
         document.removeEventListener('mousemove', this.documentMouseMove);
         document.removeEventListener('mouseup', this.documentMouseUp);
+    }
+    
+    // Touch event handlers for mobile/iOS support
+    startDrawTouch(e) {
+        e.preventDefault();
+        
+        // Get the first touch point
+        if (e.touches.length === 0) return;
+        const touch = e.touches[0];
+        
+        const rect = this.canvas.getBoundingClientRect();
+        this.isDrawing = true;
+        this.canvasRect = rect;
+        
+        // Get touch position relative to canvas
+        this.startX = touch.clientX - rect.left;
+        this.startY = touch.clientY - rect.top;
+        
+        // Clamp to canvas bounds
+        this.startX = Math.max(0, Math.min(this.startX, this.canvas.width));
+        this.startY = Math.max(0, Math.min(this.startY, this.canvas.height));
+        
+        this.endX = this.startX;
+        this.endY = this.startY;
+    }
+    
+    drawTouch(e) {
+        if (!this.isDrawing) return;
+        
+        e.preventDefault();
+        
+        // Get the first touch point
+        if (e.touches.length === 0) return;
+        const touch = e.touches[0];
+        
+        // Use stored canvas rect or get new one
+        const rect = this.canvasRect || this.canvas.getBoundingClientRect();
+        
+        // Get touch position relative to canvas
+        this.endX = touch.clientX - rect.left;
+        this.endY = touch.clientY - rect.top;
+        
+        // Clamp to canvas bounds
+        this.endX = Math.max(0, Math.min(this.endX, this.canvas.width));
+        this.endY = Math.max(0, Math.min(this.endY, this.canvas.height));
+        
+        // Apply ratio constraint if set
+        if (this.ratio > 0) {
+            const width = Math.abs(this.endX - this.startX);
+            const height = width / this.ratio;
+            this.endY = this.startY + (this.endY > this.startY ? height : -height);
+            
+            // Clamp again after ratio adjustment
+            this.endY = Math.max(0, Math.min(this.endY, this.canvas.height));
+        }
+        
+        this.redrawSelection();
+        this.updatePreview();
+        this.updateCoords();
+    }
+    
+    endDrawTouch(e) {
+        e.preventDefault();
+        this.isDrawing = false;
     }
     
     redrawSelection() {
