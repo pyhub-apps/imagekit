@@ -8,6 +8,8 @@ require (
 	github.com/spf13/cobra v1.8.1
 )
 
+replace github.com/disintegration/imaging => github.com/kovidgoyal/imaging v1.6.4
+
 require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
