@@ -110,19 +110,55 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         deferredPrompt = e;
         
-        // Show install button if not already installed
-        const installBtn = document.getElementById('installPWA');
-        if (installBtn) {
-            installBtn.style.display = 'block';
-            installBtn.addEventListener('click', async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    console.log('Install prompt outcome:', outcome);
-                    deferredPrompt = null;
-                    installBtn.style.display = 'none';
+        // Show install banner if not already installed
+        const installBanner = document.getElementById('installPWA');
+        const installBtn = document.getElementById('installBtn');
+        const dismissBtn = document.getElementById('dismissBtn');
+        
+        if (installBanner) {
+            // Show the banner
+            installBanner.style.display = 'block';
+            
+            // Handle install button click
+            if (installBtn) {
+                installBtn.addEventListener('click', async () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        console.log('Install prompt outcome:', outcome);
+                        deferredPrompt = null;
+                        installBanner.style.display = 'none';
+                        
+                        // Store that user has seen the prompt
+                        localStorage.setItem('pwa-install-dismissed', 'true');
+                    }
+                });
+            }
+            
+            // Handle dismiss button click
+            if (dismissBtn) {
+                dismissBtn.addEventListener('click', () => {
+                    installBanner.style.display = 'none';
+                    // Remember dismissal for this session
+                    sessionStorage.setItem('pwa-install-dismissed', 'true');
+                });
+            }
+            
+            // Auto-hide after 10 seconds if not interacted
+            setTimeout(() => {
+                if (installBanner.style.display !== 'none') {
+                    installBanner.style.opacity = '0';
+                    setTimeout(() => {
+                        installBanner.style.display = 'none';
+                        installBanner.style.opacity = '1';
+                    }, 500);
                 }
-            });
+            }, 10000);
+            
+            // Don't show if dismissed in this session
+            if (sessionStorage.getItem('pwa-install-dismissed') === 'true') {
+                installBanner.style.display = 'none';
+            }
         }
     });
     
