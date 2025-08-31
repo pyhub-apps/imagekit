@@ -73,15 +73,15 @@ func (u *Updater) Update(release *Release, force bool) error {
 	// Replace the binary
 	if err := u.replaceBinary(execPath, data); err != nil {
 		// Restore from backup on failure
-		u.restoreBackup(backupPath, execPath)
+		_ = u.restoreBackup(backupPath, execPath)
 		return fmt.Errorf("failed to replace binary: %w", err)
 	}
 	
 	// Remove backup
-	os.Remove(backupPath)
+	_ = os.Remove(backupPath)
 	
 	// Update config
-	u.configManager.UpdateLastCheck(release.TagName)
+	_ = u.configManager.UpdateLastCheck(release.TagName)
 	
 	return nil
 }
@@ -96,7 +96,7 @@ func (u *Updater) downloadBinary(url string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("download failed with status %d", resp.StatusCode)
@@ -111,13 +111,13 @@ func (u *Updater) createBackup(srcPath, backupPath string) error {
 	if err != nil {
 		return err
 	}
-	defer src.Close()
+	defer func() { _ = src.Close() }()
 	
 	dst, err := os.Create(backupPath)
 	if err != nil {
 		return err
 	}
-	defer dst.Close()
+	defer func() { _ = dst.Close() }()
 	
 	_, err = io.Copy(dst, src)
 	return err
@@ -131,7 +131,7 @@ func (u *Updater) replaceBinary(execPath string, data []byte) error {
 		if err := os.Rename(execPath, oldPath); err != nil {
 			return err
 		}
-		defer os.Remove(oldPath)
+		defer func() { _ = os.Remove(oldPath) }()
 	}
 	
 	// Write new binary
@@ -158,7 +158,7 @@ func (u *Updater) replaceBinary(execPath string, data []byte) error {
 // restoreBackup restores the binary from backup
 func (u *Updater) restoreBackup(backupPath, execPath string) error {
 	// Remove failed update attempt
-	os.Remove(execPath)
+	_ = os.Remove(execPath)
 	
 	// Restore backup
 	return os.Rename(backupPath, execPath)
@@ -179,7 +179,7 @@ func (u *Updater) ShowUpdateNotification() {
 	}
 	
 	// Update last check time
-	u.configManager.UpdateLastCheck(u.currentVersion)
+	_ = u.configManager.UpdateLastCheck(u.currentVersion)
 	
 	// Show notification
 	fmt.Println()

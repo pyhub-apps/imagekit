@@ -107,49 +107,49 @@ func (p *Processor) processSingleFile(inputPath, outputPath string, options Proc
 		if err != nil {
 			return fmt.Errorf("failed to open input file: %w", err)
 		}
-		defer inputFile.Close()
+		defer func() { _ = inputFile.Close() }()
 		
 		// Create output file
 		outputFile, err := os.Create(outputPath)
 		if err != nil {
 			return fmt.Errorf("failed to create output file: %w", err)
 		}
-		defer outputFile.Close()
+		defer func() { _ = outputFile.Close() }()
 		
 		// Resize operation
 		if err := p.transformer.Resize(inputFile, outputFile, *options.ResizeOptions); err != nil {
-			os.Remove(outputPath) // Clean up on failure
+			_ = os.Remove(outputPath) // Clean up on failure
 			return fmt.Errorf("resize failed: %w", err)
 		}
 		
 		// If DPI is also specified, process it
 		if options.DPI > 0 {
 			// Close files first
-			inputFile.Close()
-			outputFile.Close()
+			_ = inputFile.Close()
+			_ = outputFile.Close()
 			
 			// Use the resized output as input for DPI change
 			tempFile, err := os.Open(outputPath)
 			if err != nil {
 				return fmt.Errorf("failed to open temp file: %w", err)
 			}
-			defer tempFile.Close()
+			defer func() { _ = tempFile.Close() }()
 			
 			tempOutputPath := outputPath + ".tmp"
 			tempOutput, err := os.Create(tempOutputPath)
 			if err != nil {
 				return fmt.Errorf("failed to create temp output: %w", err)
 			}
-			defer tempOutput.Close()
+			defer func() { _ = tempOutput.Close() }()
 			
 			if err := p.transformer.SetDPI(tempFile, tempOutput, options.DPI); err != nil {
-				os.Remove(tempOutputPath)
+				_ = os.Remove(tempOutputPath)
 				return fmt.Errorf("DPI setting failed: %w", err)
 			}
 			
 			// Replace original with DPI-adjusted version
-			tempFile.Close()
-			tempOutput.Close()
+			_ = tempFile.Close()
+			_ = tempOutput.Close()
 			if err := os.Rename(tempOutputPath, outputPath); err != nil {
 				return fmt.Errorf("failed to replace file: %w", err)
 			}
@@ -160,16 +160,16 @@ func (p *Processor) processSingleFile(inputPath, outputPath string, options Proc
 		if err != nil {
 			return fmt.Errorf("failed to open input file: %w", err)
 		}
-		defer inputFile.Close()
+		defer func() { _ = inputFile.Close() }()
 		
 		outputFile, err := os.Create(outputPath)
 		if err != nil {
 			return fmt.Errorf("failed to create output file: %w", err)
 		}
-		defer outputFile.Close()
+		defer func() { _ = outputFile.Close() }()
 		
 		if err := p.transformer.SetDPI(inputFile, outputFile, options.DPI); err != nil {
-			os.Remove(outputPath) // Clean up on failure
+			_ = os.Remove(outputPath) // Clean up on failure
 			return fmt.Errorf("DPI setting failed: %w", err)
 		}
 	} else {
