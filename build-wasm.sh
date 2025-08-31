@@ -6,7 +6,25 @@
 set -e
 
 # Get version from git tag or use default
-VERSION=${VERSION:-$(git describe --tags --always 2>/dev/null || echo "dev")}
+# Try multiple methods to get version info
+if [ -n "$VERSION" ]; then
+    # Use environment variable if set
+    echo "Using VERSION from environment: $VERSION"
+elif git describe --tags --always --long 2>/dev/null > /dev/null; then
+    # Full version with tags
+    VERSION=$(git describe --tags --always --long 2>/dev/null)
+    echo "Using git describe with tags: $VERSION"
+elif git rev-parse --short HEAD 2>/dev/null > /dev/null; then
+    # Fallback to short commit hash with default version prefix
+    COMMIT=$(git rev-parse --short HEAD 2>/dev/null)
+    VERSION="1.2535.17-${COMMIT}"
+    echo "Using fallback version with commit: $VERSION"
+else
+    # Final fallback
+    VERSION="1.2535.17-dev"
+    echo "Using default version: $VERSION"
+fi
+
 # Remove leading 'v' if present to avoid duplication in HTML
 VERSION_CLEAN=${VERSION#v}
 echo "Building WebAssembly with version: $VERSION_CLEAN"
