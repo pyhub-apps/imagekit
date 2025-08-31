@@ -16,14 +16,20 @@ fi
 
 echo "Generating placeholder PWA icons..."
 
-# Create a simple gradient placeholder icon (512x512)
-convert -size 512x512 \
+# Create a simple gradient placeholder icon (512x512) with transparent background
+convert -size 512x512 xc:transparent \
+    -draw "roundrectangle 0,0,512,512,80,80" \
+    -clip-path "roundrectangle 0,0,512,512,80,80" \
+    -background transparent \
     -define gradient:angle=45 \
-    gradient:'#667eea-#764ba2' \
+    -fill gradient:'#667eea-#764ba2' \
+    -draw "roundrectangle 50,50,462,462,60,60" \
     -gravity center \
     -fill white \
     -pointsize 200 \
     -annotate +0+0 '🖼' \
+    -background transparent \
+    -compose over \
     $ICON_DIR/icon-512x512.png
 
 # Generate all required sizes

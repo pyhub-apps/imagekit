@@ -35,24 +35,29 @@ echo "Generating PWA icons from $SOURCE_ICON..."
 cp "$SOURCE_ICON" "$ICON_DIR/icon-512x512.png"
 echo "✓ icon-512x512.png"
 
-# Generate all required sizes
+# Generate all required sizes (maintaining transparency)
 sizes=(16 32 72 96 128 144 152 180 192 384)
 for size in "${sizes[@]}"; do
     convert "$SOURCE_ICON" \
         -resize ${size}x${size} \
+        -background transparent \
+        -gravity center \
+        -extent ${size}x${size} \
         -unsharp 0.5x0.5+0.5+0.008 \
         "$ICON_DIR/icon-${size}x${size}.png"
     echo "✓ icon-${size}x${size}.png"
 done
 
 # Generate Apple Touch Icon with padding (180x180)
+# Note: Apple Touch Icon typically needs a solid background
 convert "$SOURCE_ICON" \
     -resize 160x160 \
     -gravity center \
-    -background white \
+    -background transparent \
     -extent 180x180 \
     "$ICON_DIR/apple-touch-icon.png"
-echo "✓ apple-touch-icon.png"
+echo "✓ apple-touch-icon.png (transparent background)"
+echo "  Note: iOS may add its own background for Apple Touch Icons"
 
 # Generate favicon.ico with multiple sizes
 convert "$SOURCE_ICON" \

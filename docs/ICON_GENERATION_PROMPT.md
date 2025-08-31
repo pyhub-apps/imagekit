@@ -7,6 +7,7 @@ Create a modern, minimalist app icon for "ImageKit" - a privacy-focused web-base
 
 Design Requirements:
 - Square format, 512x512 pixels
+- **TRANSPARENT BACKGROUND** (PNG format with alpha channel)
 - Clean, flat design with subtle depth
 - Must work on both light and dark backgrounds
 - Professional app store quality
@@ -34,7 +35,8 @@ Make it look like a premium app icon you'd see in Apple App Store or Google Play
 ```
 Design a 512x512 pixel app icon with these exact specifications:
 
-Background: Rounded square with purple gradient (#667eea top-left to #764ba2 bottom-right)
+Background: TRANSPARENT (PNG with alpha channel)
+Icon Shape: Rounded square with purple gradient (#667eea top-left to #764ba2 bottom-right)
 
 Main Element: Create a white, minimalist symbol in the center that combines:
 - Two overlapping rectangles (representing before/after images)
