@@ -4,6 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>파이썬사랑방 ImageKit - 브라우저 이미지 변환 도구</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="브라우저에서 안전하게 이미지를 변환하는 도구 - 서버 전송 없이 100% 프라이버시 보장">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="ImageKit">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/icons/icon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/icons/icon-180x180.png">
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:title" content="파이썬사랑방 ImageKit">
+    <meta property="og:description" content="브라우저에서 안전하게 이미지를 변환하는 도구">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="/static/icons/icon-512x512.png">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -83,6 +105,13 @@
                     빠른 처리
                 </span>
             </div>
+            <!-- PWA Install Button -->
+            <button id="installPWA" class="mt-6 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-full hover:from-purple-700 hover:to-pink-700 transform hover:scale-105 transition-all duration-200 shadow-lg" style="display: none;">
+                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8l-8 8-8-8"></path>
+                </svg>
+                앱 설치하기
+            </button>
         </header>
 
         <main>

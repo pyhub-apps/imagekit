@@ -58,10 +58,42 @@ async function initWasm() {
     }
 }
 
+// Register Service Worker for PWA
+async function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+        try {
+            const registration = await navigator.serviceWorker.register('/static/service-worker.js');
+            console.log('Service Worker registered:', registration);
+            
+            // Check for updates periodically
+            setInterval(() => {
+                registration.update();
+            }, 60 * 60 * 1000); // Check every hour
+            
+            // Handle updates
+            registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        // New service worker available
+                        if (confirm('새 버전이 있습니다. 업데이트하시겠습니까?')) {
+                            newWorker.postMessage({ type: 'SKIP_WAITING' });
+                            window.location.reload();
+                        }
+                    }
+                });
+            });
+        } catch (error) {
+            console.error('Service Worker registration failed:', error);
+        }
+    }
+}
+
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
     initWasm();
     setupEventListeners();
+    registerServiceWorker();
     
     // Set current year in footer
     const yearElement = document.getElementById('current-year');
@@ -71,6 +103,33 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Initialize crop dialog
     cropDialog = new CropDialog();
+    
+    // Add install prompt handler for PWA
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Show install button if not already installed
+        const installBtn = document.getElementById('installPWA');
+        if (installBtn) {
+            installBtn.style.display = 'block';
+            installBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    console.log('Install prompt outcome:', outcome);
+                    deferredPrompt = null;
+                    installBtn.style.display = 'none';
+                }
+            });
+        }
+    });
+    
+    // Check if app is installed
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        console.log('App is running in standalone mode');
+    }
 });
 
 // Setup event listeners
