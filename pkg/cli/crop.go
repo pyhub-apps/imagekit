@@ -133,21 +133,21 @@ func processSingleCropFile(transformer *transform.Transformer, inputPath, output
 	if err != nil {
 		return fmt.Errorf("입력 파일을 열 수 없습니다: %w", err)
 	}
-	defer inputFile.Close()
+	defer func() { _ = inputFile.Close() }()
 	
 	// Create output file
 	outputFile, err := os.Create(outputPath)
 	if err != nil {
 		return fmt.Errorf("출력 파일을 생성할 수 없습니다: %w", err)
 	}
-	defer outputFile.Close()
+	defer func() { _ = outputFile.Close() }()
 	
 	// Perform crop
 	if err := transformer.CropEdges(inputFile, outputFile, options); err != nil {
 		return fmt.Errorf("크롭 실패: %w", err)
 	}
 	
-	bar.Finish()
+	_ = bar.Finish()
 	fmt.Printf("✅ 크롭 완료: %s\n", outputPath)
 	
 	return nil

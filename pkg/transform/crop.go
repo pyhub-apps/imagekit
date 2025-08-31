@@ -157,11 +157,8 @@ func ValidateCropOptions(options EdgeCropOptions, imgWidth, imgHeight int) error
 		return fmt.Errorf("crop would remove entire height (remaining: %d)", remainingHeight)
 	}
 	
-	// Warn if cropping more than 50% of the image
-	if remainingWidth < imgWidth/2 || remainingHeight < imgHeight/2 {
-		// This is just a warning in the validation, actual cropping will proceed
-		// The calling code can decide what to do with this information
-	}
+	// Note: Could add a warning if cropping more than 50% of the image
+	// but for now we just validate that the crop is within bounds
 	
 	return nil
 }

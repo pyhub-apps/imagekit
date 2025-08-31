@@ -27,7 +27,7 @@ func runInfo(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("파일을 열 수 없습니다: %w", err)
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	
 	// Read file content into buffer to allow multiple reads
 	buf := &bytes.Buffer{}

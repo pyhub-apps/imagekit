@@ -160,14 +160,14 @@ func processSingleFile(transformer *transform.Transformer, inputPath, outputPath
 		if err != nil {
 			return fmt.Errorf("입력 파일을 열 수 없습니다: %w", err)
 		}
-		defer inputFile.Close()
+		defer func() { _ = inputFile.Close() }()
 		
 		// Create output file
 		outputFile, err := os.Create(outputPath)
 		if err != nil {
 			return fmt.Errorf("출력 파일을 생성할 수 없습니다: %w", err)
 		}
-		defer outputFile.Close()
+		defer func() { _ = outputFile.Close() }()
 		
 		// Resize operation
 		resizeMode := getResizeMode(mode)
@@ -186,21 +186,21 @@ func processSingleFile(transformer *transform.Transformer, inputPath, outputPath
 		// If DPI is also specified, we need to process it separately
 		if dpi > 0 {
 			// Re-open files for DPI processing
-			inputFile.Close()
-			outputFile.Close()
+			_ = inputFile.Close()
+			_ = outputFile.Close()
 			
 			// Use the resized output as input for DPI change
 			tempFile, err := os.Open(outputPath)
 			if err != nil {
 				return fmt.Errorf("임시 파일을 열 수 없습니다: %w", err)
 			}
-			defer tempFile.Close()
+			defer func() { _ = tempFile.Close() }()
 			
 			outputFile2, err := os.Create(outputPath + ".tmp")
 			if err != nil {
 				return fmt.Errorf("임시 출력 파일을 생성할 수 없습니다: %w", err)
 			}
-			defer outputFile2.Close()
+			defer func() { _ = outputFile2.Close() }()
 			
 			bar.Describe("DPI 설정 중...")
 			if err := transformer.SetDPI(tempFile, outputFile2, dpi); err != nil {
@@ -208,7 +208,9 @@ func processSingleFile(transformer *transform.Transformer, inputPath, outputPath
 			}
 			
 			// Replace original with DPI-adjusted version
-			os.Rename(outputPath+".tmp", outputPath)
+			if err := os.Rename(outputPath+".tmp", outputPath); err != nil {
+				return fmt.Errorf("failed to rename temporary file: %w", err)
+			}
 		}
 	} else if dpi > 0 {
 		// Open input file for DPI
@@ -216,14 +218,14 @@ func processSingleFile(transformer *transform.Transformer, inputPath, outputPath
 		if err != nil {
 			return fmt.Errorf("입력 파일을 열 수 없습니다: %w", err)
 		}
-		defer inputFile.Close()
+		defer func() { _ = inputFile.Close() }()
 		
 		// Create output file
 		outputFile, err := os.Create(outputPath)
 		if err != nil {
 			return fmt.Errorf("출력 파일을 생성할 수 없습니다: %w", err)
 		}
-		defer outputFile.Close()
+		defer func() { _ = outputFile.Close() }()
 		
 		// DPI only operation
 		bar.Describe("DPI 설정 중...")
@@ -232,7 +234,7 @@ func processSingleFile(transformer *transform.Transformer, inputPath, outputPath
 		}
 	}
 	
-	bar.Finish()
+	_ = bar.Finish()
 	fmt.Printf("✅ 변환 완료: %s\n", outputPath)
 	
 	return nil

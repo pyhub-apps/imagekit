@@ -227,11 +227,12 @@ func TestProcessImageWithDPIEdgeCases(t *testing.T) {
 			inputBuf := &bytes.Buffer{}
 			
 			// Encode based on format (for valid formats)
-			if tt.format == FormatJPEG {
-				jpeg.Encode(inputBuf, img, nil)
-			} else if tt.format == FormatPNG {
-				png.Encode(inputBuf, img)
-			} else {
+			switch tt.format {
+			case FormatJPEG:
+				_ = jpeg.Encode(inputBuf, img, nil)
+			case FormatPNG:
+				_ = png.Encode(inputBuf, img)
+			default:
 				// For invalid format, just write some bytes
 				inputBuf.Write([]byte("invalid"))
 			}

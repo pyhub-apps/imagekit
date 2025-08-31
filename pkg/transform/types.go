@@ -1,7 +1,6 @@
 package transform
 
 import (
-	"image"
 	"io"
 )
 
@@ -71,11 +70,4 @@ func NewTransformer() *Transformer {
 	return &Transformer{
 		preserveMetadata: false,
 	}
-}
-
-// detectFormat detects the format of an image from its data
-func detectFormat(img image.Image) (ImageFormat, error) {
-	// This is a simplified detection - in real implementation,
-	// we would check the actual image headers
-	return FormatJPEG, nil
 }

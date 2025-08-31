@@ -28,7 +28,7 @@ func LoadImage(r io.Reader) (image.Image, ImageFormat, error) {
 	img, err := imaging.Decode(reader, imaging.AutoOrientation(true))
 	if err != nil {
 		// If imaging.Decode fails, try standard image.Decode as fallback
-		reader.Seek(0, 0)
+		_, _ = reader.Seek(0, 0)
 		standardImg, format, decodeErr := image.Decode(reader)
 		if decodeErr != nil {
 			return nil, "", fmt.Errorf("failed to decode image: %w", decodeErr)
@@ -49,7 +49,7 @@ func LoadImage(r io.Reader) (image.Image, ImageFormat, error) {
 	}
 	
 	// Detect format from the buffer
-	reader.Seek(0, 0)
+	_, _ = reader.Seek(0, 0)
 	_, format, err := image.DecodeConfig(reader)
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to detect image format: %w", err)

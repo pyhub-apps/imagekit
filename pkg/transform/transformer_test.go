@@ -386,7 +386,7 @@ func BenchmarkTransformerResize(b *testing.B) {
 	// Create a test image
 	img := image.NewRGBA(image.Rect(0, 0, 1920, 1080))
 	inputBuf := &bytes.Buffer{}
-	jpeg.Encode(inputBuf, img, nil)
+	_ = jpeg.Encode(inputBuf, img, nil)
 	inputData := inputBuf.Bytes()
 	
 	options := ResizeOptions{
@@ -399,7 +399,7 @@ func BenchmarkTransformerResize(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		outputBuf := &bytes.Buffer{}
-		transformer.Resize(bytes.NewReader(inputData), outputBuf, options)
+		_ = transformer.Resize(bytes.NewReader(inputData), outputBuf, options)
 	}
 }
 
@@ -409,12 +409,12 @@ func BenchmarkTransformerSetDPI(b *testing.B) {
 	// Create a test image
 	img := image.NewRGBA(image.Rect(0, 0, 1000, 1000))
 	inputBuf := &bytes.Buffer{}
-	jpeg.Encode(inputBuf, img, nil)
+	_ = jpeg.Encode(inputBuf, img, nil)
 	inputData := inputBuf.Bytes()
 	
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		outputBuf := &bytes.Buffer{}
-		transformer.SetDPI(bytes.NewReader(inputData), outputBuf, 300)
+		_ = transformer.SetDPI(bytes.NewReader(inputData), outputBuf, 300)
 	}
 }

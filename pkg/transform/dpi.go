@@ -21,14 +21,6 @@ const (
 	inchesToMeters = 0.0254
 )
 
-// setImageDPI sets the DPI metadata for an image
-func setImageDPI(img image.Image, format ImageFormat, dpi int) (image.Image, error) {
-	// For now, we return the image as-is since Go's standard library
-	// doesn't directly support DPI metadata manipulation
-	// In a real implementation, we would need to handle the raw image data
-	return img, nil
-}
-
 // SetJPEGDPI sets DPI for JPEG images by modifying JFIF header
 func SetJPEGDPI(data []byte, dpi int) ([]byte, error) {
 	// JPEG files start with SOI marker (0xFFD8)
