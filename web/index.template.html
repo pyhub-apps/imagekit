@@ -192,7 +192,15 @@
 
             <!-- Image List -->
             <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 hidden" id="imageList">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">선택된 이미지</h2>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">선택된 이미지</h2>
+                    <button id="addMoreBtn" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        이미지 추가
+                    </button>
+                </div>
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4" id="imageGrid"></div>
             </div>
 

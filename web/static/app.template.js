@@ -241,6 +241,37 @@ function setupEventListeners() {
         });
     }
     
+    // Add More Images button
+    const addMoreBtn = document.getElementById('addMoreBtn');
+    if (addMoreBtn && fileInput) {
+        addMoreBtn.addEventListener('click', () => {
+            const newInput = document.createElement('input');
+            newInput.type = 'file';
+            newInput.accept = 'image/jpeg,image/png';
+            newInput.multiple = true;
+            newInput.addEventListener('change', (e) => {
+                const newFiles = Array.from(e.target.files);
+                const validNewFiles = newFiles.filter(file => {
+                    if (!file.type.match(/^image\/(jpeg|png)$/)) {
+                        console.warn(`Skipping ${file.name}: not a JPEG or PNG`);
+                        return false;
+                    }
+                    if (file.size > 10 * 1024 * 1024) {
+                        alert(`${file.name}은(는) 10MB를 초과합니다.`);
+                        return false;
+                    }
+                    return true;
+                });
+                
+                if (validNewFiles.length > 0) {
+                    selectedFiles = selectedFiles.concat(validNewFiles);
+                    displaySelectedImages();
+                }
+            });
+            newInput.click();
+        });
+    }
+    
     // Options toggles with auto-save
     const enableResize = document.getElementById('enableResize');
     const resizeOptions = document.getElementById('resizeOptions');
@@ -434,6 +465,7 @@ function handleFiles(files) {
     
     document.getElementById('imageList').classList.remove('hidden');
     document.getElementById('optionsPanel').classList.remove('hidden');
+    document.getElementById('uploadArea').classList.add('hidden');
 }
 
 // Display selected images
@@ -457,6 +489,7 @@ function displaySelectedImages() {
                     document.getElementById('imageList').classList.add('hidden');
                     document.getElementById('optionsPanel').classList.add('hidden');
                     document.getElementById('results').classList.add('hidden');
+                    document.getElementById('uploadArea').classList.remove('hidden');
                 } else {
                     displaySelectedImages();
                 }
