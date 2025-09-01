@@ -1,4 +1,4 @@
-module github.com/allieus/pyhub-imagekit
+module github.com/allieus/imagekit
 
 go 1.24.4
 

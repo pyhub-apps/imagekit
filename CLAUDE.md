@@ -26,7 +26,7 @@ This is a Go-based CLI tool for image transformation, designed for optimizing im
 ### Go Module Setup
 ```bash
 # Initialize Go module
-go mod init github.com/allieus/pyhub-imagekit
+go mod init github.com/allieus/imagekit
 
 # Add dependencies
 go get github.com/disintegration/imaging  # For image processing

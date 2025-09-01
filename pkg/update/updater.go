@@ -26,7 +26,7 @@ func NewUpdater(currentVersion string) (*Updater, error) {
 	
 	return &Updater{
 		currentVersion: currentVersion,
-		client:         NewGitHubClient("pyhub-apps", "pyhub-imagekit"),
+		client:         NewGitHubClient("pyhub-apps", "imagekit"),
 		configManager:  configManager,
 	}, nil
 }

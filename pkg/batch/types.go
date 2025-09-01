@@ -1,6 +1,6 @@
 package batch
 
-import "github.com/allieus/pyhub-imagekit/pkg/transform"
+import "github.com/allieus/imagekit/pkg/transform"
 
 // BatchResult contains the results of batch processing
 type BatchResult struct {

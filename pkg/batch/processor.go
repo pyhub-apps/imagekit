@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	
-	"github.com/allieus/pyhub-imagekit/pkg/transform"
+	"github.com/allieus/imagekit/pkg/transform"
 )
 
 // Processor handles batch image processing

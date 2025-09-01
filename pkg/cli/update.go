@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 	
-	"github.com/allieus/pyhub-imagekit/pkg/update"
+	"github.com/allieus/imagekit/pkg/update"
 	"github.com/spf13/cobra"
 )
 

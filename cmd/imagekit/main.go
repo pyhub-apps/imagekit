@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 	
-	"github.com/allieus/pyhub-imagekit/pkg/cli"
-	"github.com/allieus/pyhub-imagekit/pkg/update"
+	"github.com/allieus/imagekit/pkg/cli"
+	"github.com/allieus/imagekit/pkg/update"
 )
 
 // Version is set at build time

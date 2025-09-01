@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	
-	"github.com/allieus/pyhub-imagekit/pkg/batch"
-	"github.com/allieus/pyhub-imagekit/pkg/transform"
+	"github.com/allieus/imagekit/pkg/batch"
+	"github.com/allieus/imagekit/pkg/transform"
 	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 )

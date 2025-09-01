@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 	
-	"github.com/allieus/pyhub-imagekit/pkg/transform"
+	"github.com/allieus/imagekit/pkg/transform"
 	"github.com/spf13/cobra"
 )
 

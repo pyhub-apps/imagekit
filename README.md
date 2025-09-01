@@ -1,6 +1,6 @@
 # ImageKit - 이미지 변환 CLI 도구
 
-> 🌐 **웹에서 바로 사용하기**: [https://pyhub-imagekit.pages.dev](https://pyhub-imagekit.pages.dev)  
+> 🌐 **웹에서 바로 사용하기**: [https://imagekit.pages.dev](https://imagekit.pages.dev)  
 > 설치 없이 브라우저에서 직접 이미지를 변환할 수 있습니다! (WebAssembly 버전)
 
 미리캔버스(MiriCanvas)에 최적화된 이미지 변환 도구입니다.
@@ -11,12 +11,12 @@
 
 ```bash
 # Intel Mac
-curl -L https://github.com/pyhub-apps/pyhub-imagekit/releases/latest/download/imagekit-darwin-amd64 -o imagekit
+curl -L https://github.com/pyhub-apps/imagekit/releases/latest/download/imagekit-darwin-amd64 -o imagekit
 chmod +x imagekit
 sudo mv imagekit /usr/local/bin/
 
 # Apple Silicon (M1/M2)
-curl -L https://github.com/pyhub-apps/pyhub-imagekit/releases/latest/download/imagekit-darwin-arm64 -o imagekit
+curl -L https://github.com/pyhub-apps/imagekit/releases/latest/download/imagekit-darwin-arm64 -o imagekit
 chmod +x imagekit
 sudo mv imagekit /usr/local/bin/
 ```
@@ -25,12 +25,12 @@ sudo mv imagekit /usr/local/bin/
 
 ```bash
 # x64 (Intel/AMD)
-curl -L https://github.com/pyhub-apps/pyhub-imagekit/releases/latest/download/imagekit-linux-amd64 -o imagekit
+curl -L https://github.com/pyhub-apps/imagekit/releases/latest/download/imagekit-linux-amd64 -o imagekit
 chmod +x imagekit
 sudo mv imagekit /usr/local/bin/
 
 # ARM64 (Raspberry Pi 4, ARM servers)
-curl -L https://github.com/pyhub-apps/pyhub-imagekit/releases/latest/download/imagekit-linux-arm64 -o imagekit
+curl -L https://github.com/pyhub-apps/imagekit/releases/latest/download/imagekit-linux-arm64 -o imagekit
 chmod +x imagekit
 sudo mv imagekit /usr/local/bin/
 ```
@@ -41,7 +41,7 @@ PowerShell을 관리자 권한으로 실행:
 
 ```powershell
 # Windows (x64)
-Invoke-WebRequest -Uri "https://github.com/pyhub-apps/pyhub-imagekit/releases/latest/download/imagekit-windows-amd64.exe" -OutFile "imagekit.exe"
+Invoke-WebRequest -Uri "https://github.com/pyhub-apps/imagekit/releases/latest/download/imagekit-windows-amd64.exe" -OutFile "imagekit.exe"
 Move-Item -Path "imagekit.exe" -Destination "C:\Windows\System32\imagekit.exe"
 
 # 또는 사용자 폴더에 설치
@@ -73,8 +73,8 @@ imagekit --version
 
 ```bash
 # 저장소 클론
-git clone https://github.com/allieus/pyhub-imagekit.git
-cd pyhub-imagekit
+git clone https://github.com/allieus/imagekit.git
+cd imagekit
 
 # 빌드
 make build
@@ -259,7 +259,7 @@ make lint
 ## 라이브러리로 사용
 
 ```go
-import "github.com/allieus/pyhub-imagekit/pkg/transform"
+import "github.com/allieus/imagekit/pkg/transform"
 
 // 트랜스포머 생성
 transformer := transform.NewTransformer()
